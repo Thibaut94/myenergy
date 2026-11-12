@@ -264,6 +264,68 @@ div.st-head{display:flex;gap:8px;align-items:center}
 .rel-lvl{display:inline-block;padding:4px 14px;border-radius:14px;font-weight:700;font-size:1.05rem}
 .rel-list{margin:4px 0 0;padding-left:18px}.rel-list li{margin:3px 0}
 @media print{.st-head,.prov-line,.st-arr{display:none!important}}
+/* === Comptes utilisateurs (src/05c_auth.js) : écran d'accès, menu du compte, Mon compte === */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.au-wrap{max-width:480px;margin:8px auto 0;min-width:0}
+.au-wrap.wide{max-width:780px}
+.au-card .pb{display:flex;flex-direction:column;gap:10px}
+.au-card .ph h2:focus{outline:none}
+.au-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.au-tabs .tab{width:100%;font-weight:600}
+.au-form{display:flex;flex-direction:column;gap:12px;margin:0;min-width:0}
+.au-fld{min-width:0}
+.au-submit{width:100%;margin:4px 0 0;min-height:44px}
+.au-eye{flex:none;align-self:stretch;border:0;border-left:1px solid var(--line);background:transparent;color:var(--primary);font:inherit;font-size:.82rem;font-weight:600;min-height:40px;min-width:76px;padding:0 10px;cursor:pointer;border-radius:0 8px 8px 0}
+.au-eye:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.au-hint{font-size:.8rem;color:var(--muted)}
+.au-err{color:var(--err);font-size:.82rem;font-weight:500}
+.au-bad .inp{border-color:var(--err)}
+.au-phone-set{border:0;margin:0;padding:0}
+.au-phone-set legend{padding:0;margin:0 0 4px}
+.au-phone{display:grid;grid-template-columns:minmax(0,14rem) minmax(0,1fr);gap:8px}
+.pw-box{display:flex;flex-direction:column;gap:4px}
+.pw-meter{height:8px;border-radius:4px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}
+.pw-meter span{display:block;height:100%;width:0;background:var(--err);transition:width .2s}
+.pw-meter[data-s="2"] span{background:var(--warn)}.pw-meter[data-s="3"] span,.pw-meter[data-s="4"] span{background:var(--ok)}
+.pw-lbl{margin:0;font-size:.82rem;color:var(--muted)}
+.pw-rules{list-style:none;margin:0;padding:0;font-size:.8rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 14px}
+.pw-rules li.ok{color:var(--ok)}
+.au-terms .chk{align-items:flex-start;margin:0;min-height:0}.au-terms .chk input{margin-top:2px;flex:none}
+.au-terms.au-bad .chk span{color:var(--err)}
+.au-links{margin:-4px 0 0;display:flex;justify-content:flex-end}
+.au-alt{margin:4px 0 0;text-align:center;color:var(--muted)}
+.au-foot{text-align:center;margin:8px 0 0}
+.au-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.au-loading{text-align:center;color:var(--muted);padding:48px 0}
+.au-steps{padding-left:22px;margin:4px 0}.au-steps li{margin:6px 0}
+.au-code{font-family:var(--f-mono);font-size:.86em;background:var(--surface2);border:1px solid var(--line);padding:0 5px;border-radius:4px;overflow-wrap:anywhere}
+.au-legal h3{margin-top:1.1em}.au-legal p,.au-legal li{max-width:75ch}.au-legal ul{padding-left:20px}
+.au-account{max-width:780px;margin:0 auto}
+.au-h{font-size:1.3rem;margin:4px 0 12px}.au-h:focus{outline:none}
+.au-danger{border-color:var(--err)}.au-danger .ph{background:var(--err-bg)}
+.au-danger-btn{background:var(--err);border-color:var(--err);color:#FFFFFF;width:100%}
+:root[data-theme="dark"] .au-danger-btn{color:#0B1626}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .au-danger-btn{color:#0B1626}}
+.hd-in{position:relative}
+.acct{display:flex;min-width:0}
+.acct-btn{gap:8px;max-width:100%}
+.acct-av{display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:var(--primary);color:var(--primary-ink);font:600 .75rem/1 var(--f-text)}
+.acct-nm{max-width:12em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-off{font-size:.72rem;font-weight:600;color:var(--warn)}
+.acct-menu{position:absolute;right:16px;top:calc(100% + 4px);width:min(320px,calc(100% - 24px));background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 10px 28px rgba(0,0,0,.22);padding:8px;z-index:35;display:flex;flex-direction:column;gap:2px}
+.acct-menu[hidden]{display:none}
+.acct-id{padding:6px 8px 10px;margin-bottom:4px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere;min-width:0}
+.acct-id span{color:var(--muted);font-size:.86rem}.acct-id .badge{color:var(--warn);align-self:flex-start;margin-top:4px}
+.acct-item{display:flex;align-items:center;min-height:42px;padding:6px 10px;border:0;border-radius:6px;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer;width:100%}
+.acct-item:hover,.acct-item:focus-visible{background:var(--surface2)}
+.acct-item.danger{color:var(--err);font-weight:600}
+@media (max-width:480px){
+  .acct-menu{left:10px;right:10px;width:auto}
+  .acct-nm{max-width:7em}
+  .au-phone{grid-template-columns:1fr}
+  .au-wrap{margin-top:4px}
+}
+@media print{.acct-menu,.acct{display:none!important}}
 </style>
 </head>
 <body>
@@ -1935,6 +1997,41 @@ SD.logo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4QAAAEZCAYAAADPKeuPAAA
 SD.logoImg = function (cls) { return '<img class="' + (cls || 'logo') + '" src="' + SD.logo + '" alt="MyEnergy" width="' + SD.logoSize.w + '" height="' + SD.logoSize.h + '">'; };
 // Logo pour les exports PDF / Word : PNG et proportions d'origine. Renvoie une promesse {data, w, h}.
 SD.logoPng = function () { return Promise.resolve({ data: SD.logo, w: SD.logoSize.w, h: SD.logoSize.h }); };
+;
+
+/* ===== 03b_auth_config.js ===== */
+/* ==========================================================================
+   SD.authConfig : configuration des comptes utilisateurs (Supabase).
+
+   >>> À REMPLIR PAR LE PROPRIÉTAIRE (une seule fois, voir supabase/LISEZMOI.md) <<<
+   Dans le tableau de bord Supabase : Project Settings -> API (ou « Data API »).
+     - url     : collez la « Project URL », par exemple "https://abcdefghijkl.supabase.co"
+     - anonKey : collez la clé PUBLIQUE : « Publishable key » (commence par "sb_publishable_",
+                 onglet « API Keys ») ou, à défaut, l'ancienne clé « anon » « public » (commence par "eyJ...")
+   Puis reconstruisez : powershell -ExecutionPolicy Bypass -File build.ps1
+
+   La clé publishable / « anon » est PUBLIQUE par conception : elle peut figurer dans ce fichier et dans le site.
+   Ce sont les règles RLS de supabase/setup.sql qui protègent les données.
+   NE JAMAIS coller ici une clé secrète (« sb_secret_... » ou l'ancienne « service_role ») : elle donnerait
+   un accès total à la base à quiconque télécharge l'application.
+
+   Tant que url ou anonKey est vide, l'application affiche « Authentification non configurée »
+   et reste inaccessible (aucun contournement par l'adresse, par exemple ?auth=off).
+
+   offlineGraceDays : nombre de jours pendant lesquels la version hors ligne reste utilisable sans
+                      réseau après la dernière vérification en ligne réussie (session expirée).
+   siteUrl          : adresse publique de l'application ; les liens des e-mails (confirmation,
+                      mot de passe oublié) y renvoient. Elle doit figurer dans les « Redirect URLs »
+                      de Supabase (Authentication -> URL Configuration).
+   ========================================================================== */
+var SD = (typeof SD !== 'undefined') ? SD : (window.SD = window.SD || {});
+SD.authConfig = {
+  url: "https://czyclhwiobqrotecqrgt.supabase.co",
+  anonKey: "sb_publishable_XHaX2xRhHua40zPIV-DCyA_jwawhZti",
+  offlineGraceDays: 30,
+  siteUrl: "https://thibaut94.github.io/myenergy/"
+};
+
 ;
 
 /* ===== 04_engine.js ===== */
@@ -4432,6 +4529,923 @@ SD.audit = (function () {
 
 ;
 
+/* ===== 05c_auth.js ===== */
+/* ==========================================================================
+   SD.auth : comptes utilisateurs (Supabase, supabase-js v2).
+   - Écran d'accès (« porte ») avant l'assistant : connexion, inscription, mot de passe oublié,
+     nouveau mot de passe (lien de récupération), profil à compléter, page Confidentialité.
+   - Session persistante (localStorage) jusqu'à « Se déconnecter » ; renouvellement automatique du jeton.
+   - Menu du compte dans l'en-tête et écran « Mon compte » (nom, téléphone, mot de passe, suppression).
+   - Hors ligne : session encore valide -> utilisation normale ; session expirée sans réseau -> utilisation
+     tolérée tant que l'utilisateur ne s'est pas déconnecté et que la dernière vérification en ligne
+     réussie date de moins de SD.authConfig.offlineGraceDays jours (30 par défaut). Au-delà :
+     « Connexion requise : reconnectez-vous en ligne ». La déconnexion efface tout (session, profil en cache).
+
+   NOTE D'HONNÊTETÉ (site statique) : la connexion contrôle l'accès à l'INTERFACE, mais le code de
+   l'application (y compris le moteur de calcul) est public et téléchargeable ; quelqu'un qui le
+   souhaite peut le lire ou le modifier dans son navigateur. Les comptes protègent réellement les
+   données de l'utilisateur stockées dans Supabase (profil, et plus tard projets enregistrés) grâce aux
+   règles RLS de supabase/setup.sql. Protéger réellement la logique de calcul exigerait un serveur
+   (calcul exécuté côté serveur, accessible seulement avec un jeton valide). De même, le délai de grâce
+   hors ligne repose sur des données du navigateur : c'est une commodité, pas une barrière de sécurité.
+
+   Sécurité : aucun identifiant dans les adresses (formulaires POST interceptés), aucun mot de passe
+   journalisé ni conservé (les champs mot de passe ne sont jamais mémorisés dans les brouillons),
+   seule la clé publique « anon » est utilisée (jamais de clé service_role).
+   Tests : seul le crochet window.MYENERGY_AUTH_TEST (défini AVANT le chargement de la page, par
+   test/browser_test.ps1 via le protocole DevTools, ou par test/auth.test.js) remplace le client Supabase
+   par un client simulé. Aucun paramètre d'adresse (?auth=off, #auth=off...) ne contourne l'écran d'accès.
+   ========================================================================== */
+var SD = (typeof SD !== 'undefined') ? SD : (window.SD = window.SD || {});
+SD.auth = (function () {
+  'use strict';
+  var W = (typeof window !== 'undefined') ? window : globalThis;
+  function hasDoc() { return typeof document !== 'undefined' && !!document && typeof document.getElementById === 'function'; }
+  var LIB = {
+    version: '2.118.0',
+    urls: ['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js', 'https://unpkg.com/@supabase/supabase-js@2.118.0/dist/umd/supabase.js'],
+    // Empreinte SRI du fichier figé dans vendor/supabase-js-2.118.0.umd.js (mêmes octets sur jsDelivr et unpkg)
+    sri: 'sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK'
+  };
+  var REC_KEY = 'myenergy.auth.v1', SB_KEY = 'myenergy.sb.auth', DAY = 86400000;
+  var clock = function () { return Date.now(); };
+
+  /* ---------- Configuration ---------- */
+  function cfg() {
+    var c = SD.authConfig || {}, g = Number(c.offlineGraceDays);
+    return { url: String(c.url || '').trim(), anonKey: String(c.anonKey || '').trim(), grace: isFinite(g) && g >= 0 ? g : 30, siteUrl: String(c.siteUrl || '').trim() };
+  }
+  // Clé secrète collée par erreur (sb_secret_... ou JWT de rôle service_role) : refusée, jamais utilisée
+  function secretKey(k) {
+    if (/^sb_secret_/.test(k)) return true;
+    try { var p = k.split('.'); if (p.length === 3 && typeof atob === 'function') return /"role"\s*:\s*"service_role"/.test(atob(p[1].replace(/-/g, '+').replace(/_/g, '/'))); } catch (e) { /* rien */ }
+    return false;
+  }
+  function configured() { var c = cfg(); return /^https:\/\/[^\s/]+\.[^\s/]+/.test(c.url) && c.anonKey.length > 20 && !secretKey(c.anonKey); }
+  function testHook() { var h = W.MYENERGY_AUTH_TEST; return h && typeof h === 'object' && typeof h.createClient === 'function' ? h : null; }
+
+  /* ---------- Adresse d'arrivée (liens des e-mails Supabase, flux implicite) ---------- */
+  // Lue au chargement du module, avant que l'application ou supabase-js ne modifie l'adresse.
+  var URLI = (function () {
+    var out = { auth: false, recovery: false, error: null };
+    try {
+      var h = String((W.location && W.location.hash) || '').replace(/^#/, ''), q = String((W.location && W.location.search) || '').replace(/^\?/, ''), p = {};
+      (h + '&' + q).split('&').forEach(function (kv) { var i = kv.indexOf('='); if (i > 0) { try { p[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' ')); } catch (e) { /* rien */ } } });
+      out.auth = !!(p.access_token || p.refresh_token || p.error_code || (p.error && p.error_description));
+      out.recovery = p.type === 'recovery';
+      if (p.error_code || p.error_description) out.error = { code: p.error_code || p.error || '', message: p.error_description || '' };
+    } catch (e) { /* rien */ }
+    return out;
+  })();
+  function cleanUrl() {
+    try { if (URLI.auth && W.history && W.history.replaceState && W.location) W.history.replaceState(null, '', W.location.pathname + W.location.search.replace(/[?&](error|error_code|error_description)=[^&]*/g, '')); } catch (e) { /* rien */ }
+  }
+
+  /* ---------- Stockage local protégé ---------- */
+  function ls() { try { return W.localStorage || null; } catch (e) { return null; } }
+  function lsGet(k) { try { var v = ls().getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function lsSet(k, v) { try { ls().setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  function lsDel(k) { try { ls().removeItem(k); } catch (e) { /* rien */ } }
+  // Stockage passé à supabase-js (chaînes brutes, erreurs absorbées : navigation privée, quota...)
+  var sbStorage = {
+    getItem: function (k) { try { return ls().getItem(k); } catch (e) { return null; } },
+    setItem: function (k, v) { try { ls().setItem(k, v); } catch (e) { /* rien */ } },
+    removeItem: function (k) { try { ls().removeItem(k); } catch (e) { /* rien */ } }
+  };
+  function readRec() { var r = lsGet(REC_KEY); return r && typeof r === 'object' && r.uid ? r : null; }
+  function writeRec(r) { lsSet(REC_KEY, r); }
+  // Déconnexion : efface la session Supabase, le profil en cache et la trace de dernière vérification
+  function purgeLocal() {
+    [REC_KEY, SB_KEY, SB_KEY + '-code-verifier', SB_KEY + '-user'].forEach(lsDel);
+    try { var s = ls(), del = []; for (var i = 0; s && i < s.length; i++) { var k = s.key(i); if (/^sb-.*-auth-token/.test(k || '')) del.push(k); } del.forEach(lsDel); } catch (e) { /* rien */ }
+    S.draft = {};
+  }
+
+  /* ---------- Outils ---------- */
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function msgBox(t, m) { var sym = { ok: '✓', warn: '!', err: '×', info: 'i' }[t] || 'i'; return '<div class="msg msg-' + t + '" role="' + (t === 'err' ? 'alert' : 'status') + '"><span class="sym" aria-hidden="true">' + sym + '</span><span>' + m + '</span></div>'; }
+  function toast(m, t) { try { if (SD.U && SD.U.toast) SD.U.toast(m, t); } catch (e) { /* rien */ } }
+  function fmtDays(d) { d = Math.max(0, Math.floor(d)); return d + (d > 1 ? ' jours' : ' jour'); }
+  async function safeCall(fn) {
+    try { var r = await fn(); return r || { data: null, error: null }; } catch (e) { return { data: null, error: e || new Error('erreur') }; }
+  }
+
+  /* ---------- Validation : e-mail, téléphone, mot de passe ---------- */
+  function normEmail(e) { return String(e || '').trim().toLowerCase(); }
+  function validEmail(e) { e = normEmail(e); return e.length <= 254 && /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(e) && !/\.\./.test(e); }
+  // Pays : [ISO, nom, indicatif, chiffres nationaux min, max, 0 initial (préfixe national) à retirer, exemple]
+  var COUNTRIES = [
+    // Afrique de l'Ouest (CEDEAO, y compris les pays de l'AES)
+    ['BJ', 'Bénin', '229', 10, 10, false, '01 90 12 34 56'], ['BF', 'Burkina Faso', '226', 8, 8, false, '70 12 34 56'], ['CV', 'Cabo Verde', '238', 7, 7, false, '991 12 34'],
+    ['CI', 'Côte d\'Ivoire', '225', 10, 10, false, '07 12 34 56 78'], ['GM', 'Gambie', '220', 7, 7, false, '301 23 45'], ['GH', 'Ghana', '233', 9, 9, true, '024 123 4567'],
+    ['GN', 'Guinée', '224', 9, 9, false, '621 12 34 56'], ['GW', 'Guinée-Bissau', '245', 9, 9, false, '955 012 345'], ['LR', 'Liberia', '231', 7, 9, true, '077 012 3456'],
+    ['ML', 'Mali', '223', 8, 8, false, '65 01 23 45'], ['NE', 'Niger', '227', 8, 8, false, '93 12 34 56'], ['NG', 'Nigeria', '234', 8, 10, true, '0802 123 4567'],
+    ['SN', 'Sénégal', '221', 9, 9, false, '77 123 45 67'], ['SL', 'Sierra Leone', '232', 8, 8, true, '076 123 456'], ['TG', 'Togo', '228', 8, 8, false, '90 12 34 56'],
+    // Afrique centrale (CEEAC)
+    ['AO', 'Angola', '244', 9, 9, false, '923 123 456'], ['BI', 'Burundi', '257', 8, 8, false, '79 56 12 34'], ['CM', 'Cameroun', '237', 9, 9, false, '6 71 23 45 67'],
+    ['CF', 'Centrafrique', '236', 8, 8, false, '70 01 23 45'], ['CG', 'Congo', '242', 9, 9, false, '06 123 4567'], ['CD', 'RD Congo', '243', 9, 9, true, '081 123 4567'],
+    ['GA', 'Gabon', '241', 7, 8, false, '06 03 12 34'], ['GQ', 'Guinée équatoriale', '240', 9, 9, false, '222 123 456'], ['RW', 'Rwanda', '250', 9, 9, true, '072 012 3456'],
+    ['ST', 'Sao Tomé-et-Principe', '239', 7, 7, false, '981 23 45'], ['TD', 'Tchad', '235', 8, 8, false, '63 01 23 45'],
+    // Europe
+    ['FR', 'France', '33', 9, 9, true, '06 12 34 56 78'],
+    // Autre : format international E.164 (8 à 15 chiffres)
+    ['XX', 'Autre pays (format international)', '', 8, 15, false, '+1 415 555 2671']
+  ];
+  var GROUPS = [['Afrique de l\'Ouest (CEDEAO)', 0, 15], ['Afrique centrale', 15, 26], ['Europe', 26, 27], ['Autres', 27, 28]];
+  function country(iso) { for (var i = 0; i < COUNTRIES.length; i++) if (COUNTRIES[i][0] === iso) return COUNTRIES[i]; return null; }
+  function phoneHint(iso) {
+    var c = country(iso) || country('TG');
+    if (c[0] === 'XX') return 'Numéro complet avec l\'indicatif, par exemple +1 415 555 2671 (8 à 15 chiffres).';
+    return 'Indicatif +' + c[2] + ', ' + (c[3] === c[4] ? c[3] : c[3] + ' à ' + c[4]) + ' chiffres' + (c[5] ? ' (le 0 initial est facultatif)' : '') + ', par exemple ' + c[6] + '.';
+  }
+  // Renvoie {ok, e164, country, national, msg}
+  function normalizePhone(iso, raw) {
+    var c = country(iso), s = String(raw == null ? '' : raw).trim();
+    if (!c) return { ok: false, msg: 'Choisissez un pays.' };
+    if (!s) return { ok: false, msg: 'Le numéro de téléphone est obligatoire.' };
+    if (/[^\d\s.\-()+\/]/.test(s)) return { ok: false, msg: 'Le numéro ne doit contenir que des chiffres (espaces, points et tirets acceptés).' };
+    var intl = /^\s*(\+|00)/.test(s), d = s.replace(/\D/g, '');
+    if (intl && /^\s*00/.test(s)) d = d.slice(2);
+    if (c[0] === 'XX') {
+      if (!intl) return { ok: false, msg: 'Pour un autre pays, saisissez le numéro complet avec l\'indicatif, en commençant par + (par exemple +1 415 555 2671).' };
+      if (d.length < 8 || d.length > 15 || d[0] === '0') return { ok: false, msg: 'Numéro international invalide : 8 à 15 chiffres, indicatif compris.' };
+      var known = COUNTRIES.filter(function (k) { return k[2] && d.indexOf(k[2]) === 0; })[0];
+      if (known) { var r0 = normalizePhone(known[0], '+' + d); if (r0.ok) return r0; return { ok: false, msg: 'Indicatif +' + known[2] + ' (' + known[1] + ') : ' + r0.msg.charAt(0).toLowerCase() + r0.msg.slice(1) }; }
+      return { ok: true, e164: '+' + d, country: null, national: d };
+    }
+    var dial = c[2], min = c[3], max = c[4], name = c[1] + ' (+' + dial + ')';
+    if (intl) {
+      if (d.indexOf(dial) !== 0) return { ok: false, msg: 'L\'indicatif saisi ne correspond pas au pays choisi : ' + name + '.' };
+      d = d.slice(dial.length);
+    } else if (d.length > max && d.indexOf(dial) === 0 && d.length - dial.length >= min && d.length - dial.length <= max + (c[5] ? 1 : 0)) d = d.slice(dial.length);
+    if (c[5] && d[0] === '0' && d.length - 1 >= min && d.length - 1 <= max) d = d.slice(1);
+    if (d.length < min) return { ok: false, msg: 'Numéro trop court : ' + (min === max ? min : min + ' à ' + max) + ' chiffres attendus pour ' + name + '.' };
+    if (d.length > max) return { ok: false, msg: 'Numéro trop long : ' + (min === max ? min : min + ' à ' + max) + ' chiffres attendus pour ' + name + '.' };
+    if (c[5] && d[0] === '0') return { ok: false, msg: 'Numéro invalide pour ' + name + '.' };
+    if ((dial + d).length > 15) return { ok: false, msg: 'Numéro trop long (15 chiffres au plus, indicatif compris).' };
+    return { ok: true, e164: '+' + dial + d, country: c[0], national: d };
+  }
+  // Affichage : +228 90 12 34 56
+  function formatPhone(e164, iso) {
+    var s = String(e164 || ''); if (!/^\+\d{8,15}$/.test(s)) return s;
+    var c = country(iso), d = s.slice(1);
+    if (!c || !c[2] || d.indexOf(c[2]) !== 0) c = COUNTRIES.filter(function (k) { return k[2] && d.indexOf(k[2]) === 0; })[0] || null;
+    if (!c) return s;
+    var n = d.slice(c[2].length), out = [], i = 0;
+    if (n.length % 2) { out.push(n[0]); i = 1; }
+    for (; i < n.length; i += 2) out.push(n.substr(i, 2));
+    return '+' + c[2] + ' ' + out.join(' ');
+  }
+  // Décompose un numéro enregistré pour l'édition : {country, national}
+  function splitPhone(e164, iso) {
+    var s = String(e164 || ''), d = s.replace(/^\+/, '');
+    var c = country(iso); if (!c || !c[2] || d.indexOf(c[2]) !== 0) c = COUNTRIES.filter(function (k) { return k[2] && d.indexOf(k[2]) === 0; })[0] || null;
+    if (!s) return { country: 'TG', national: '' };
+    if (!c) return { country: 'XX', national: s };
+    return { country: c[0], national: d.slice(c[2].length) };
+  }
+  var COMMON = ['password', 'motdepasse', 'azerty', 'qwerty', '12345678', '123456789', 'abc12345', 'myenergy', 'solaire', 'password1', 'azerty123', '11111111'];
+  // Règles : au moins 8 caractères, des lettres et des chiffres (72 au plus : limite de Supabase / bcrypt)
+  function passwordCheck(pw, email) {
+    pw = String(pw || '');
+    var rules = [
+      { id: 'len', ok: pw.length >= 8, t: 'Au moins 8 caractères' },
+      { id: 'let', ok: /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(pw), t: 'Au moins une lettre' },
+      { id: 'dig', ok: /\d/.test(pw), t: 'Au moins un chiffre' }
+    ];
+    var ok = rules.every(function (r) { return r.ok; }) && pw.length <= 72, msg = '';
+    if (pw.length > 72) msg = 'Mot de passe trop long (72 caractères au plus).';
+    else if (!ok) msg = 'Le mot de passe doit contenir au moins 8 caractères, avec des lettres et des chiffres.';
+    var low = pw.toLowerCase(), e = normEmail(email), score = 0;
+    if (pw.length >= 8) score++;
+    if (pw.length >= 12) score++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+    if (/\d/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
+    if (pw.length >= 16) score++;
+    if (!ok) score = Math.min(score, 1);
+    // Refusé : mot de passe courant, caractère répété, ou identique à l'adresse e-mail ; plafonné à « Faible » s'il en contient un
+    var local = e ? e.split('@')[0] : '', bare = low.replace(/[^a-zà-ÿ]/g, '');
+    var banned = COMMON.indexOf(low) >= 0 || (bare.length >= 4 && COMMON.indexOf(bare) >= 0 && pw.length < 12) || /^(.)\1+$/.test(pw) || (!!e && (low === e || low === local));
+    var weak = banned || COMMON.some(function (w) { return low.indexOf(w) >= 0; }) || (local.length >= 4 && low.indexOf(local) >= 0);
+    if (weak) score = Math.min(score, 1);
+    score = Math.max(0, Math.min(4, score));
+    if (ok && banned) { ok = false; msg = 'Mot de passe trop courant ou trop proche de votre adresse e-mail : choisissez-en un autre.'; }
+    return { ok: ok, score: pw ? score : 0, label: pw ? ['Très faible', 'Faible', 'Moyenne', 'Bonne', 'Excellente'][score] : '', rules: rules, msg: msg };
+  }
+  function validName(n) { n = String(n || '').trim().replace(/\s+/g, ' '); return n.length >= 2 && n.length <= 100 ? n : null; }
+  // Inscription : {name, email, country, phone, pw, pw2, terms} -> {ok, errors, name, email, phone, country}
+  function validateSignup(f) {
+    f = f || {}; var er = {}, out = {};
+    out.name = validName(f.name); if (!out.name) er.name = 'Indiquez votre nom complet (2 à 100 caractères).';
+    out.email = normEmail(f.email); if (!validEmail(out.email)) er.email = 'Adresse e-mail invalide.';
+    var ph = normalizePhone(f.country || 'TG', f.phone); if (!ph.ok) er.phone = ph.msg; else { out.phone = ph.e164; out.country = ph.country; }
+    var pc = passwordCheck(f.pw, out.email); if (!pc.ok) er.pw = pc.msg;
+    if (!f.pw2) er.pw2 = 'Confirmez le mot de passe.'; else if (f.pw2 !== f.pw) er.pw2 = 'Les deux mots de passe ne sont pas identiques.';
+    if (!f.terms) er.terms = 'Vous devez accepter les conditions d\'utilisation et la politique de confidentialité.';
+    out.errors = er; out.ok = Object.keys(er).length === 0; return out;
+  }
+
+  /* ---------- Erreurs Supabase -> messages en français ---------- */
+  function isNetwork(e) {
+    if (!e) return false;
+    var m = String(e.message || e), n = String(e.name || '');
+    if (n === 'AuthRetryableFetchError' || n === 'AbortError') return true;
+    if (/failed to fetch|networkerror|network request failed|load failed|fetch failed|err_internet_disconnected|bibliothèque indisponible/i.test(m)) return true;
+    return false;
+  }
+  function errorMessage(e) {
+    if (!e) return '';
+    var code = String(e.code || e.error_code || ''), m = String(e.message || e.msg || e.error_description || e), st = +e.status || 0;
+    if (isNetwork(e)) return 'Connexion impossible : vérifiez votre accès à Internet, puis réessayez.';
+    if (code === 'invalid_credentials' || /invalid login credentials/i.test(m)) return 'E-mail ou mot de passe incorrect.';
+    if (code === 'email_not_confirmed' || /email not confirmed/i.test(m)) return 'Adresse e-mail non confirmée : cliquez sur le lien reçu par e-mail (pensez à vérifier les courriers indésirables).';
+    if (code === 'user_already_exists' || code === 'email_exists' || /already (been )?registered|already exists/i.test(m)) return 'Un compte existe déjà avec cette adresse e-mail. Connectez-vous ou utilisez « Mot de passe oublié ? ».';
+    if (st === 429 || /rate_limit/.test(code) || /rate limit|too many requests|only request this after/i.test(m)) return 'Trop de tentatives en peu de temps : patientez quelques minutes avant de réessayer.';
+    if (code === 'same_password' || /should be different from the old/i.test(m)) return 'Le nouveau mot de passe doit être différent de l\'ancien.';
+    if (code === 'weak_password' || /password should/i.test(m)) return 'Mot de passe trop faible : au moins 8 caractères, avec des lettres et des chiffres.';
+    if (code === 'otp_expired' || /link is invalid or has expired|token has expired/i.test(m)) return 'Ce lien est invalide ou a expiré : demandez un nouvel e-mail.';
+    if (code === 'email_address_invalid' || /email address .*invalid|invalid email/i.test(m)) return 'Adresse e-mail refusée : vérifiez-la.';
+    if (code === 'signup_disabled' || /signups not allowed/i.test(m)) return 'Les inscriptions sont fermées pour le moment.';
+    if (code === 'user_not_found' || /user .*not (be )?found|does not exist/i.test(m) && /user|sub claim/i.test(m)) return 'Ce compte n\'existe plus : reconnectez-vous ou créez un nouveau compte.';
+    if (/database error saving new user/i.test(m)) return 'Inscription refusée par le serveur (numéro de téléphone ou nom invalide). Vérifiez vos informations.';
+    if (code === 'session_not_found' || code === 'refresh_token_not_found' || code === 'bad_jwt' || /session (missing|not found|expired)|jwt expired|invalid refresh token/i.test(m)) return 'Votre session a expiré : reconnectez-vous.';
+    if (code === 'PGRST202' || (/delete_my_account/.test(m) && /could not find|does not exist/i.test(m))) return 'Suppression impossible : la fonction delete_my_account n\'est pas installée sur le serveur. Prévenez l\'administrateur (supabase/setup.sql).';
+    if (code === '42P01' || code === 'PGRST205' || /relation .*profiles.* does not exist|could not find the table/i.test(m)) return 'Table des profils absente sur le serveur : l\'administrateur doit exécuter supabase/setup.sql.';
+    if (code === '23514' || /check constraint/i.test(m)) return 'Valeur refusée par le serveur : vérifiez le format du numéro de téléphone.';
+    if (st >= 500) return 'Le service d\'authentification est momentanément indisponible : réessayez dans quelques minutes.';
+    return 'Erreur inattendue' + (code || st ? ' (' + (code || st) + ')' : '') + ' : réessayez plus tard.';
+  }
+
+  /* ---------- Délai de grâce hors ligne (fonction pure) ---------- */
+  // rec : {uid, lastOnline (ms), loggedOut?} ; renvoie 'ok' | 'expired' | 'none' | 'loggedout'
+  function graceDecision(rec, nowMs, days) {
+    if (!rec || !rec.uid) return 'none';
+    if (rec.loggedOut) return 'loggedout';
+    var t = Number(rec.lastOnline); if (!isFinite(t) || t <= 0) return 'none';
+    var age = nowMs - t;
+    if (age < -DAY) return 'expired'; // horloge reculée de plus d'un jour : vérification en ligne exigée
+    return age < Math.max(0, Number(days) || 0) * DAY ? 'ok' : 'expired';
+  }
+
+  /* ---------- État ---------- */
+  var S = { status: 'init', view: 'loading', back: 'login', msg: null, errors: {}, busy: false, user: null, offline: false, client: null, mock: false,
+    draft: {}, menu: false, pendingEmail: '', canResend: false, recovery: false, ready: false, onReady: null, painted: '', subscribed: false };
+  function allowed() { return S.status === 'in'; }
+
+  /* ---------- Client Supabase ---------- */
+  function clientOptions() {
+    return { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: sbStorage, storageKey: SB_KEY, flowType: 'implicit' } };
+  }
+  function loadOne(src, sri) {
+    return new Promise(function (resolve, reject) {
+      if (!hasDoc()) { reject(new Error('Bibliothèque indisponible (pas de document)')); return; }
+      var s = document.createElement('script'), t = setTimeout(function () { s.remove(); reject(new Error('Bibliothèque indisponible (délai dépassé)')); }, 20000);
+      s.src = src; s.async = true; s.crossOrigin = 'anonymous'; if (sri) s.integrity = sri;
+      s.onload = function () { clearTimeout(t); if (W.supabase && W.supabase.createClient) resolve(true); else reject(new Error('Bibliothèque indisponible')); };
+      s.onerror = function () { clearTimeout(t); s.remove(); reject(new Error('Bibliothèque indisponible (hors ligne ?)')); };
+      document.head.appendChild(s);
+    });
+  }
+  var libP = null;
+  // supabase-js : copie intégrée (version hors ligne) sinon jsDelivr puis unpkg, avec contrôle d'intégrité SRI
+  function loadLib() {
+    if (W.supabase && typeof W.supabase.createClient === 'function') return Promise.resolve(true);
+    if (libP) return libP;
+    var list = [];
+    var v = SD.OFFLINE && typeof SD.vendorUrl === 'function' ? SD.vendorUrl('supabase') : null;
+    if (v) list.push([v, null]);
+    LIB.urls.forEach(function (u) { list.push([u, LIB.sri]); });
+    libP = (async function () {
+      var last = null;
+      for (var i = 0; i < list.length; i++) { try { await loadOne(list[i][0], list[i][1]); return true; } catch (e) { last = e; } }
+      libP = null; throw last || new Error('Bibliothèque indisponible (hors ligne ?)');
+    })();
+    return libP;
+  }
+  async function makeClient() {
+    var hook = testHook(), c = cfg();
+    if (hook) return await hook.createClient(c, clientOptions());
+    await loadLib();
+    return W.supabase.createClient(c.url, c.anonKey, clientOptions());
+  }
+  function subscribe() {
+    if (!S.client || S.subscribed || !S.client.auth || typeof S.client.auth.onAuthStateChange !== 'function') return;
+    S.subscribed = true;
+    // Rappel différé : supabase-js déconseille d'appeler d'autres méthodes dans le rappel lui-même
+    S.client.auth.onAuthStateChange(function (ev, session) { setTimeout(function () { onEvent(ev, session); }, 0); });
+  }
+  function onEvent(ev, session) {
+    if (ev === 'PASSWORD_RECOVERY') { S.recovery = true; toGate('recovery'); return; }
+    if (ev === 'TOKEN_REFRESHED' && session && S.user) { var r = readRec(); if (r && r.uid === S.user.id) { r.lastOnline = clock(); r.sessionExp = (session.expires_at || 0) * 1000; writeRec(r); } if (S.offline) { S.offline = false; paint(); } return; }
+    // Fin de session imposée (jeton révoqué, déconnexion depuis un autre onglet) : vérifiée avant d'agir,
+    // un événement tardif ne doit pas déconnecter une session ouverte entre-temps
+    if (ev === 'SIGNED_OUT' && S.status === 'in' && !S.loggingOut && !S.offline && S.client) {
+      safeCall(function () { return S.client.auth.getSession(); }).then(function (gs) {
+        if ((gs.data && gs.data.session) || S.status !== 'in' || S.offline || (gs.error && isNetwork(gs.error))) return;
+        purgeLocal(); S.user = null; toGate('login', { t: 'info', m: 'Votre session a pris fin : reconnectez-vous.' });
+      });
+    }
+  }
+
+  /* ---------- Démarrage et décision d'accès ---------- */
+  async function start(onReady) {
+    S.onReady = onReady || null;
+    installDom();
+    S.status = 'gate'; S.view = 'loading'; paint();
+    var hook = testHook();
+    if (!hook && !configured()) { S.view = 'unconfigured'; paint(); return S.view; }
+    S.mock = !!hook;
+    if (URLI.error) S.msg = { t: 'err', m: errorMessage(URLI.error) };
+    if (URLI.recovery) S.recovery = true;
+    try { S.client = await makeClient(); } catch (e) { S.client = null; }
+    subscribe();
+    await evaluate();
+    return S.status === 'in' ? 'in' : S.view;
+  }
+  async function evaluate() {
+    var rec = readRec(), c = S.client;
+    if (!c) { offlineDecision(rec, true); return; }
+    var gs = await safeCall(function () { return c.auth.getSession(); });
+    cleanUrl();
+    var session = gs.data && gs.data.session;
+    if (session && S.recovery) { toGate('recovery'); return; }
+    if (session) {
+      var gu = await safeCall(function () { return c.auth.getUser(); }), user = gu.data && gu.data.user;
+      if (user && !gu.error) { await enterOnline(session, user); return; }
+      if (isNetwork(gu.error)) {
+        // Pas de réseau : session encore valide -> accès normal ; sinon délai de grâce
+        if (session.expires_at && session.expires_at * 1000 > clock()) { enterOffline(rec, session.user); return; }
+        offlineDecision(rec); return;
+      }
+      // Session refusée par le serveur (compte supprimé, jeton révoqué...)
+      await safeCall(function () { return c.auth.signOut({ scope: 'local' }); });
+      purgeLocal(); S.user = null; toGate('login', { t: 'warn', m: errorMessage(gu.error) }); return;
+    }
+    if (gs.error && isNetwork(gs.error)) { offlineDecision(rec); return; }
+    if (rec && W.navigator && W.navigator.onLine === false) { offlineDecision(rec); return; }
+    if (rec) lsDel(REC_KEY); // plus de session côté Supabase : trace locale effacée
+    toGate(S.view === 'loading' ? 'login' : S.view, S.msg);
+  }
+  function offlineDecision(rec, noLib) {
+    var d = graceDecision(rec, clock(), cfg().grace);
+    if (d === 'ok') { enterOffline(rec, null); return; }
+    if (d === 'expired') { toGate('blocked'); return; }
+    toGate('login', { t: 'warn', m: noLib ? 'Pas de connexion à Internet : la première connexion doit se faire en ligne.' : 'Pas de connexion à Internet : reconnectez-vous en ligne.' });
+  }
+  async function loadProfile(user) {
+    var meta = (user && user.user_metadata) || {}, p = { name: meta.full_name || '', phone: meta.phone || '', country: meta.country || '' };
+    if (!S.client || typeof S.client.from !== 'function') return p;
+    var r = await safeCall(function () { return S.client.from('profiles').select('full_name, phone, country').eq('id', user.id).maybeSingle(); });
+    if (r.data && !r.error) { p.name = r.data.full_name || p.name; p.phone = r.data.phone || p.phone; p.country = r.data.country || p.country; p.fromTable = true; }
+    return p;
+  }
+  async function enterOnline(session, user) {
+    var p = await loadProfile(user);
+    S.user = { id: user.id, email: user.email || '', name: p.name, phone: p.phone, country: p.country || '' };
+    S.offline = false; S.recovery = false; S.lastOnline = clock();
+    writeRec({ v: 1, uid: S.user.id, email: S.user.email, name: S.user.name, phone: S.user.phone, country: S.user.country, lastOnline: S.lastOnline, sessionExp: (session && session.expires_at || 0) * 1000 });
+    if (!S.user.phone || !validName(S.user.name)) { toGate('complete'); return; }
+    enterApp();
+  }
+  function enterOffline(rec, sUser) {
+    var meta = (sUser && sUser.user_metadata) || {};
+    S.user = rec ? { id: rec.uid, email: rec.email || '', name: rec.name || '', phone: rec.phone || '', country: rec.country || '' }
+      : { id: sUser && sUser.id, email: (sUser && sUser.email) || '', name: meta.full_name || '', phone: meta.phone || '', country: meta.country || '' };
+    S.offline = true; S.lastOnline = rec ? rec.lastOnline : null;
+    enterApp();
+  }
+  function enterApp() {
+    S.status = 'in'; S.menu = false; S.msg = null; S.errors = {}; S.busy = false; S.painted = '';
+    if (!S.ready) { S.ready = true; if (typeof S.onReady === 'function') { S.onReady(); return; } }
+    paint();
+  }
+  function toGate(view, msg) { if (view !== S.view) S.errors = {}; S.status = 'gate'; S.view = view; S.msg = msg || null; S.menu = false; S.busy = false; paint(); }
+
+  /* ---------- Actions de compte (renvoient {ok, errors?, msg?}) ---------- */
+  function fail(errors, msg) { S.errors = errors || {}; S.msg = msg || null; S.busy = false; paint(); focusFirstError(); return { ok: false, errors: S.errors, msg: msg ? msg.m : '' }; }
+  async function ensureClient() {
+    if (S.client) return true;
+    try { S.client = await makeClient(); subscribe(); return true; } catch (e) { return false; }
+  }
+  function netFail() { return fail({}, { t: 'err', m: errorMessage({ name: 'AuthRetryableFetchError', message: 'Failed to fetch' }) }); }
+  async function signIn(email, pw) {
+    var er = {}; email = normEmail(email);
+    if (!validEmail(email)) er.email = 'Adresse e-mail invalide.';
+    if (!pw) er.pw = 'Saisissez votre mot de passe.';
+    if (Object.keys(er).length) return fail(er, null);
+    if (!(await ensureClient())) return netFail();
+    S.busy = true; S.msg = null; S.errors = {}; S.canResend = false; paint();
+    var c = S.client, r = await safeCall(function () { return c.auth.signInWithPassword({ email: email, password: pw }); });
+    S.busy = false;
+    if (r.error || !r.data || !r.data.session) {
+      var m = errorMessage(r.error || { message: 'Invalid login credentials' });
+      if (r.error && (r.error.code === 'email_not_confirmed' || /email not confirmed/i.test(r.error.message || ''))) { S.pendingEmail = email; S.canResend = true; }
+      return fail({}, { t: 'err', m: m });
+    }
+    S.draft = {};
+    await enterOnline(r.data.session, r.data.user || r.data.session.user);
+    return { ok: true };
+  }
+  async function signUp(f) {
+    var v = validateSignup(f);
+    if (!v.ok) return fail(v.errors, { t: 'err', m: 'Corrigez les champs signalés.' });
+    if (!(await ensureClient())) return netFail();
+    S.busy = true; S.msg = null; S.errors = {}; paint();
+    var c = S.client, opts = { data: { full_name: v.name, phone: v.phone, country: v.country } };
+    if (cfg().siteUrl) opts.emailRedirectTo = cfg().siteUrl;
+    var r = await safeCall(function () { return c.auth.signUp({ email: v.email, password: f.pw, options: opts }); });
+    S.busy = false;
+    if (r.error) return fail({}, { t: 'err', m: errorMessage(r.error) });
+    var u = r.data && r.data.user;
+    // « Confirm email » activé : une adresse déjà inscrite renvoie un utilisateur sans identité
+    if (u && Array.isArray(u.identities) && u.identities.length === 0) return fail({ email: 'Adresse déjà inscrite.' }, { t: 'err', m: errorMessage({ code: 'user_already_exists' }) });
+    S.draft = {};
+    if (r.data && r.data.session) { await enterOnline(r.data.session, u); return { ok: true, session: true }; }
+    S.pendingEmail = v.email; toGate('signupDone');
+    return { ok: true };
+  }
+  async function resend() {
+    if (!S.pendingEmail || !(await ensureClient())) return netFail();
+    var c = S.client, opts = cfg().siteUrl ? { emailRedirectTo: cfg().siteUrl } : undefined;
+    S.busy = true; paint();
+    var r = await safeCall(function () { return c.auth.resend({ type: 'signup', email: S.pendingEmail, options: opts }); });
+    S.busy = false;
+    S.msg = r.error ? { t: 'err', m: errorMessage(r.error) } : { t: 'ok', m: 'E-mail de confirmation renvoyé à ' + esc(S.pendingEmail) + '.' };
+    paint(); return { ok: !r.error };
+  }
+  async function resetPassword(email) {
+    email = normEmail(email);
+    if (!validEmail(email)) return fail({ email: 'Adresse e-mail invalide.' }, null);
+    if (!(await ensureClient())) return netFail();
+    S.busy = true; S.msg = null; paint();
+    var c = S.client, r = await safeCall(function () { return c.auth.resetPasswordForEmail(email, cfg().siteUrl ? { redirectTo: cfg().siteUrl } : undefined); });
+    S.busy = false;
+    if (r.error) return fail({}, { t: 'err', m: errorMessage(r.error) });
+    S.pendingEmail = email; toGate('forgotSent');
+    return { ok: true };
+  }
+  // Lien « mot de passe oublié » : nouveau mot de passe
+  async function setNewPassword(pw, pw2) {
+    var er = {}, pc = passwordCheck(pw, S.user && S.user.email);
+    if (!pc.ok) er.pw = pc.msg;
+    if (pw2 !== pw) er.pw2 = 'Les deux mots de passe ne sont pas identiques.';
+    if (Object.keys(er).length) return fail(er, null);
+    if (!(await ensureClient())) return netFail();
+    S.busy = true; paint();
+    var c = S.client, r = await safeCall(function () { return c.auth.updateUser({ password: pw }); });
+    S.busy = false;
+    if (r.error) return fail({}, { t: 'err', m: errorMessage(r.error) });
+    S.recovery = false;
+    var gs = await safeCall(function () { return c.auth.getSession(); });
+    var session = gs.data && gs.data.session, user = (r.data && r.data.user) || (session && session.user);
+    if (session && user) { await enterOnline(session, user); toast('Mot de passe modifié.', 'ok'); return { ok: true }; }
+    toGate('login', { t: 'ok', m: 'Mot de passe modifié : connectez-vous.' });
+    return { ok: true };
+  }
+  // Profil (nom, téléphone) : table profiles + métadonnées du compte
+  async function updateProfile(f, complete) {
+    f = f || {}; var er = {}, name = validName(f.name), ph = normalizePhone(f.country || 'TG', f.phone);
+    if (!complete) S.msgFor = 'profile';
+    if (!name) er.name = 'Indiquez votre nom complet (2 à 100 caractères).';
+    if (!ph.ok) er.phone = ph.msg;
+    if (Object.keys(er).length) return fail(er, null);
+    if (S.offline) return fail({}, { t: 'warn', m: 'Modification impossible hors ligne : reconnectez-vous à Internet.' });
+    if (!S.user || !(await ensureClient())) return netFail();
+    S.busy = true; paint();
+    var c = S.client, row = { full_name: name, phone: ph.e164, country: ph.country };
+    var r = await safeCall(function () { return c.from('profiles').update(row).eq('id', S.user.id); });
+    var r2 = await safeCall(function () { return c.auth.updateUser({ data: row }); });
+    S.busy = false;
+    if (r.error && r2.error) return fail({}, { t: 'err', m: errorMessage(r.error) });
+    S.user.name = name; S.user.phone = ph.e164; S.user.country = ph.country || '';
+    var rec = readRec(); if (rec && rec.uid === S.user.id) { rec.name = name; rec.phone = ph.e164; rec.country = ph.country || ''; writeRec(rec); }
+    S.errors = {}; S.draft = {};
+    if (complete) { enterApp(); toast('Profil complété.', 'ok'); return { ok: true }; }
+    S.msg = r.error ? { t: 'warn', m: 'Profil enregistré dans le compte, mais pas dans la table des profils : ' + errorMessage(r.error) } : { t: 'ok', m: 'Profil enregistré.' };
+    S.msgFor = 'profile'; paint(); return { ok: true };
+  }
+  async function changePassword(cur, pw, pw2) {
+    var er = {}, pc = passwordCheck(pw, S.user && S.user.email);
+    S.msgFor = 'password';
+    if (!cur) er.cur = 'Saisissez votre mot de passe actuel.';
+    if (!pc.ok) er.npw = pc.msg;
+    if (pw2 !== pw) er.npw2 = 'Les deux mots de passe ne sont pas identiques.';
+    if (Object.keys(er).length) { S.msgFor = 'password'; return fail(er, null); }
+    if (S.offline) { S.msgFor = 'password'; return fail({}, { t: 'warn', m: 'Modification impossible hors ligne : reconnectez-vous à Internet.' }); }
+    if (!S.user || !(await ensureClient())) return netFail();
+    S.busy = true; paint();
+    var c = S.client, v = await safeCall(function () { return c.auth.signInWithPassword({ email: S.user.email, password: cur }); });
+    if (v.error) { S.busy = false; S.msgFor = 'password'; return v.error.code === 'invalid_credentials' || /invalid login/i.test(v.error.message || '') ? fail({ cur: 'Mot de passe actuel incorrect.' }, null) : fail({}, { t: 'err', m: errorMessage(v.error) }); }
+    var r = await safeCall(function () { return c.auth.updateUser({ password: pw }); });
+    S.busy = false; S.msgFor = 'password';
+    if (r.error) return fail({}, { t: 'err', m: errorMessage(r.error) });
+    S.errors = {}; S.msg = { t: 'ok', m: 'Mot de passe modifié.' }; paint(); return { ok: true };
+  }
+  // Suppression du compte : fonction SQL delete_my_account() (security definer, supabase/setup.sql)
+  async function deleteAccount(confirmText) {
+    S.msgFor = 'delete';
+    if (String(confirmText || '').trim().toUpperCase() !== 'SUPPRIMER') return fail({ del: 'Tapez SUPPRIMER pour confirmer.' }, null);
+    if (S.offline) return fail({}, { t: 'warn', m: 'Suppression impossible hors ligne : reconnectez-vous à Internet.' });
+    if (!S.user || !(await ensureClient())) return netFail();
+    S.busy = true; paint();
+    var c = S.client, r = await safeCall(function () { return c.rpc('delete_my_account'); });
+    S.busy = false;
+    if (r.error) return fail({}, { t: 'err', m: errorMessage(r.error) });
+    S.loggingOut = true;
+    await safeCall(function () { return c.auth.signOut({ scope: 'local' }); });
+    purgeLocal(); S.user = null; S.offline = false; S.loggingOut = false;
+    if (SD.state) SD.state.screen = 'wizard';
+    toGate('login', { t: 'ok', m: 'Votre compte et votre profil ont été supprimés.' });
+    return { ok: true };
+  }
+  async function logout() {
+    S.loggingOut = true; S.menu = false;
+    var c = S.client;
+    if (c) {
+      var r = await safeCall(function () { return c.auth.signOut(); });
+      if (r.error) await safeCall(function () { return c.auth.signOut({ scope: 'local' }); }); // hors ligne : au moins la session locale
+    }
+    purgeLocal(); S.user = null; S.offline = false; S.loggingOut = false; S.lastOnline = null;
+    if (SD.state) SD.state.screen = 'wizard';
+    toGate('login', { t: 'ok', m: 'Vous êtes déconnecté. À bientôt !' });
+    return { ok: true };
+  }
+  // Réseau revenu alors que l'accès est toléré hors ligne : nouvelle vérification
+  async function revalidate() {
+    if (!(S.status === 'in' && S.offline) && S.view !== 'blocked') return;
+    if (!(await ensureClient())) return;
+    await evaluate();
+  }
+
+  /* ---------- Rendu : éléments de formulaire ---------- */
+  function draftVal(form, name) { var v = S.draft[form + '.' + name]; return v == null ? '' : v; }
+  function field(o) {
+    var id = 'au-' + o.form + '-' + o.name, err = S.errors[o.name], val = o.pw ? '' : (o.value != null ? o.value : draftVal(o.form, o.name));
+    var desc = [o.hint ? id + '-h' : '', err ? id + '-e' : '', o.meter ? id + '-m' : ''].filter(Boolean).join(' ');
+    return '<div class="fld au-fld' + (err ? ' au-bad' : '') + '"><label for="' + id + '"><span class="lbl">' + o.label + '</span></label><div class="inp">' +
+      '<input id="' + id + '" name="' + o.name + '" type="' + (o.pw ? 'password' : (o.type || 'text')) + '"' + (o.auto ? ' autocomplete="' + o.auto + '"' : '') + (o.inputmode ? ' inputmode="' + o.inputmode + '"' : '') +
+      (o.req !== false ? ' required aria-required="true"' : '') + (o.ro ? ' readonly' : '') + (o.max ? ' maxlength="' + o.max + '"' : '') + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (err ? ' aria-invalid="true"' : '') +
+      (desc ? ' aria-describedby="' + desc + '"' : '') + (o.meter ? ' data-meter="' + id + '-m"' : '') + (o.pw ? ' spellcheck="false" autocapitalize="off"' : '') + (o.type === 'email' ? ' autocapitalize="off" spellcheck="false"' : '') + ' value="' + esc(val) + '">' +
+      (o.pw ? '<button type="button" class="au-eye" data-act="authPw" data-arg="' + id + '" aria-controls="' + id + '" aria-pressed="false" aria-label="Afficher le mot de passe">Afficher</button>' : '') + '</div>' +
+      (o.meter ? meter(id + '-m', '') : '') +
+      (o.hint ? '<small class="au-hint" id="' + id + '-h">' + o.hint + '</small>' : '') +
+      (err ? '<small class="au-err" id="' + id + '-e">' + esc(err) + '</small>' : '') + '</div>';
+  }
+  function meter(id, pw) {
+    var p = passwordCheck(pw);
+    return '<div class="pw-box" id="' + id + '"><div class="pw-meter" data-s="' + p.score + '" aria-hidden="true"><span style="width:' + (pw ? (p.score + 1) * 20 : 0) + '%"></span></div>' +
+      '<p class="pw-lbl" aria-live="polite">Force du mot de passe : <strong>' + (p.label || '—') + '</strong></p>' +
+      '<ul class="pw-rules">' + p.rules.map(function (r) { return '<li class="' + (r.ok ? 'ok' : '') + '" data-rule="' + r.id + '"><span aria-hidden="true">' + (r.ok ? '✓' : '·') + '</span> ' + r.t + '<span class="sr"> : ' + (r.ok ? 'respecté' : 'non respecté') + '</span></li>'; }).join('') + '</ul></div>';
+  }
+  function phoneField(form, cur) {
+    cur = cur || {};
+    var iso = draftVal(form, 'country') || cur.country || 'TG', err = S.errors.phone, id = 'au-' + form + '-phone';
+    var val = S.draft[form + '.phone'] != null ? S.draft[form + '.phone'] : (cur.national || '');
+    var opts = GROUPS.map(function (g) {
+      return '<optgroup label="' + esc(g[0]) + '">' + COUNTRIES.slice(g[1], g[2]).map(function (c) { return '<option value="' + c[0] + '"' + (c[0] === iso ? ' selected' : '') + '>' + esc(c[1]) + (c[2] ? ' (+' + c[2] + ')' : '') + '</option>'; }).join('') + '</optgroup>';
+    }).join('');
+    return '<fieldset class="fld au-fld au-phone-set' + (err ? ' au-bad' : '') + '"><legend class="lbl">Téléphone</legend><div class="au-phone">' +
+      '<div class="inp"><select id="au-' + form + '-country" name="country" autocomplete="country" aria-label="Pays (indicatif)" data-phone-hint="' + id + '-h">' + opts + '</select></div>' +
+      '<div class="inp"><input id="' + id + '" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" required aria-required="true" aria-label="Numéro de téléphone" maxlength="24"' + (err ? ' aria-invalid="true"' : '') +
+      ' aria-describedby="' + id + '-h' + (err ? ' ' + id + '-e' : '') + '" placeholder="' + esc((country(iso) || [])[6] || '') + '" value="' + esc(val) + '"></div></div>' +
+      '<small class="au-hint" id="' + id + '-h">' + esc(phoneHint(iso)) + ' Le numéro n\'est pas vérifié par SMS.</small>' +
+      (err ? '<small class="au-err" id="' + id + '-e">' + esc(err) + '</small>' : '') + '</fieldset>';
+  }
+  function submitBtn(label) { return '<button type="submit" class="btn au-submit"' + (S.busy ? ' disabled aria-busy="true"' : '') + '>' + (S.busy ? 'Patientez…' : label) + '</button>'; }
+  function msgLine(forKey) { if (!S.msg || (forKey && S.msgFor !== forKey) || (!forKey && S.msgFor && S.status === 'in')) return ''; return msgBox(S.msg.t, S.msg.m); }
+
+  /* ---------- Rendu : écrans d'accès ---------- */
+  function card(title, sub, body, wide) {
+    return '<div class="au-wrap' + (wide ? ' wide' : '') + '" id="auth-gate"><section class="panel au-card" aria-labelledby="au-title"><div class="ph"><h2 id="au-title" tabindex="-1">' + title + '</h2>' + (sub ? '<p class="sub">' + sub + '</p>' : '') + '</div><div class="pb">' + body + '</div></section>' +
+      '<p class="au-foot"><button type="button" class="btn-link" data-act="authPrivacy">Confidentialité et conditions</button></p></div>';
+  }
+  function tabs(cur) {
+    return '<div class="au-tabs" role="group" aria-label="Connexion ou inscription">' +
+      '<button type="button" class="tab' + (cur === 'login' ? ' on' : '') + '" data-act="authView" data-arg="login"' + (cur === 'login' ? ' aria-current="page"' : '') + '>Connexion</button>' +
+      '<button type="button" class="tab' + (cur === 'signup' ? ' on' : '') + '" data-act="authView" data-arg="signup"' + (cur === 'signup' ? ' aria-current="page"' : '') + '>Inscription</button></div>';
+  }
+  function offlineNote() { return W.navigator && W.navigator.onLine === false ? msgBox('warn', 'Vous êtes hors ligne : la connexion et l\'inscription nécessitent Internet.') : ''; }
+  var VIEWS = {
+    loading: function () { return '<div class="au-wrap" id="auth-gate"><p class="au-loading" role="status">Vérification de la session…</p></div>'; },
+    unconfigured: function () {
+      return card('Authentification non configurée', 'L\'accès à MyEnergy nécessite un compte, mais le service de comptes n\'est pas encore relié à cette copie de l\'application.',
+        msgBox('warn', 'Utilisateur : l\'application n\'est pas encore ouverte. Réessayez plus tard ou contactez l\'éditeur.') +
+        '<h3>Pour le propriétaire</h3><ol class="au-steps">' +
+        '<li>Créez le projet Supabase et exécutez <span class="au-code">supabase/setup.sql</span> (voir <span class="au-code">supabase/LISEZMOI.md</span>).</li>' +
+        '<li>Ouvrez <span class="au-code">src/03b_auth_config.js</span> et collez la <em>Project URL</em> dans <span class="au-code">url</span> et la clé publique <em>anon</em> dans <span class="au-code">anonKey</span> (jamais la clé <em>service_role</em>).</li>' +
+        '<li>Reconstruisez : <span class="au-code">powershell -ExecutionPolicy Bypass -File build.ps1</span>, puis publiez les nouveaux fichiers.</li></ol>');
+    },
+    login: function () {
+      return card('Connexion', 'Connectez-vous pour utiliser MyEnergy.', tabs('login') + offlineNote() + msgLine() +
+        (S.canResend ? '<p><button type="button" class="btn btn-2 btn-sm" data-act="authResend">Renvoyer l\'e-mail de confirmation</button></p>' : '') +
+        '<form class="au-form" data-auth-form="login" method="post" novalidate>' +
+        field({ form: 'login', name: 'email', label: 'Adresse e-mail', type: 'email', auto: 'email', inputmode: 'email', max: 254 }) +
+        field({ form: 'login', name: 'pw', label: 'Mot de passe', pw: true, auto: 'current-password', max: 72 }) +
+        '<p class="au-links"><button type="button" class="btn-link" data-act="authView" data-arg="forgot">Mot de passe oublié ?</button></p>' +
+        submitBtn('Se connecter') + '</form>' +
+        '<p class="au-alt">Pas encore de compte ? <button type="button" class="btn-link" data-act="authView" data-arg="signup">Créer un compte</button></p>');
+    },
+    signup: function () {
+      var terr = S.errors.terms;
+      return card('Inscription', 'Créez votre compte MyEnergy. Tous les champs sont obligatoires.', tabs('signup') + offlineNote() + msgLine() +
+        '<form class="au-form" data-auth-form="signup" method="post" novalidate>' +
+        field({ form: 'signup', name: 'name', label: 'Nom complet', auto: 'name', max: 100 }) +
+        field({ form: 'signup', name: 'email', label: 'Adresse e-mail', type: 'email', auto: 'email', inputmode: 'email', max: 254, hint: 'Un lien de confirmation y sera envoyé.' }) +
+        phoneField('signup') +
+        field({ form: 'signup', name: 'pw', label: 'Mot de passe', pw: true, auto: 'new-password', max: 72, meter: true }) +
+        field({ form: 'signup', name: 'pw2', label: 'Confirmation du mot de passe', pw: true, auto: 'new-password', max: 72 }) +
+        '<div class="au-terms' + (terr ? ' au-bad' : '') + '"><label class="chk"><input type="checkbox" name="terms" id="au-signup-terms" required aria-required="true"' + (S.draft['signup.terms'] ? ' checked' : '') + (terr ? ' aria-invalid="true" aria-describedby="au-signup-terms-e"' : '') + '>' +
+        '<span>J\'accepte les <a href="#" data-act="authPrivacy">Conditions d\'utilisation et la politique de confidentialité</a></span></label>' +
+        (terr ? '<small class="au-err" id="au-signup-terms-e">' + esc(terr) + '</small>' : '') + '</div>' +
+        submitBtn('Créer mon compte') + '</form>' +
+        '<p class="au-alt">Déjà inscrit ? <button type="button" class="btn-link" data-act="authView" data-arg="login">Se connecter</button></p>');
+    },
+    signupDone: function () {
+      return card('Vérifiez votre boîte mail', '', msgBox('ok', 'Un e-mail de confirmation a été envoyé à <strong>' + esc(S.pendingEmail) + '</strong>.') + msgLine() +
+        '<p>Cliquez sur le lien qu\'il contient pour activer votre compte, puis connectez-vous. Pensez à regarder dans les courriers indésirables. Le lien n\'est valable que pendant une durée limitée.</p>' +
+        '<div class="au-actions"><button type="button" class="btn" data-act="authView" data-arg="login">Aller à la connexion</button><button type="button" class="btn btn-2" data-act="authResend"' + (S.busy ? ' disabled' : '') + '>Renvoyer l\'e-mail</button></div>');
+    },
+    forgot: function () {
+      return card('Mot de passe oublié', 'Saisissez l\'adresse de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.', offlineNote() + msgLine() +
+        '<form class="au-form" data-auth-form="forgot" method="post" novalidate>' +
+        field({ form: 'forgot', name: 'email', label: 'Adresse e-mail', type: 'email', auto: 'email', inputmode: 'email', max: 254 }) +
+        submitBtn('Envoyer le lien') + '</form><p class="au-alt"><button type="button" class="btn-link" data-act="authView" data-arg="login">Retour à la connexion</button></p>');
+    },
+    forgotSent: function () {
+      return card('E-mail envoyé', '', msgBox('ok', 'Si un compte existe pour <strong>' + esc(S.pendingEmail) + '</strong>, un e-mail contenant un lien de réinitialisation vient d\'être envoyé.') +
+        '<p>Ouvrez ce lien sur cet appareil : un formulaire vous permettra de choisir un nouveau mot de passe.</p><div class="au-actions"><button type="button" class="btn" data-act="authView" data-arg="login">Retour à la connexion</button></div>');
+    },
+    recovery: function () {
+      return card('Nouveau mot de passe', 'Choisissez le nouveau mot de passe de votre compte.', msgLine() +
+        '<form class="au-form" data-auth-form="recovery" method="post" novalidate>' +
+        field({ form: 'recovery', name: 'pw', label: 'Nouveau mot de passe', pw: true, auto: 'new-password', max: 72, meter: true }) +
+        field({ form: 'recovery', name: 'pw2', label: 'Confirmation', pw: true, auto: 'new-password', max: 72 }) +
+        submitBtn('Enregistrer le mot de passe') + '</form>');
+    },
+    complete: function () {
+      var u = S.user || {}, sp = splitPhone(u.phone, u.country);
+      return card('Compléter votre profil', 'Votre nom complet et votre numéro de téléphone sont nécessaires pour utiliser MyEnergy.', msgLine() +
+        '<form class="au-form" data-auth-form="complete" method="post" novalidate>' +
+        field({ form: 'complete', name: 'name', label: 'Nom complet', auto: 'name', max: 100, value: S.draft['complete.name'] != null ? S.draft['complete.name'] : u.name }) +
+        phoneField('complete', sp) + submitBtn('Enregistrer et continuer') + '</form>' +
+        '<p class="au-alt"><button type="button" class="btn-link" data-act="authLogout">Se déconnecter</button></p>');
+    },
+    blocked: function () {
+      var r = readRec(), d = r ? (clock() - r.lastOnline) / DAY : null;
+      return card('Connexion requise', '', msgBox('err', '<strong>Connexion requise : reconnectez-vous en ligne.</strong>') +
+        '<p>La version hors ligne reste utilisable sans réseau pendant ' + fmtDays(cfg().grace) + ' après la dernière vérification en ligne' + (d != null && isFinite(d) ? ' ; la dernière date de ' + fmtDays(d) : '') + '. Connectez cet appareil à Internet puis réessayez.</p>' +
+        '<div class="au-actions"><button type="button" class="btn" data-act="authRetry">Réessayer</button><button type="button" class="btn btn-2" data-act="authLogout">Se déconnecter</button></div>');
+    },
+    privacy: function () { return '<div class="au-wrap wide" id="auth-gate">' + privacyPanel(true) + '</div>'; }
+  };
+
+  /* ---------- Page « Confidentialité et conditions » (modèle à faire relire) ---------- */
+  function privacyPanel(withBack) {
+    var back = withBack ? '<p><button type="button" class="btn btn-2" data-act="authBack">Retour</button></p>' : '';
+    return '<section class="panel au-legal" aria-labelledby="au-title"><div class="ph"><h2 id="au-title" tabindex="-1">Confidentialité et conditions d\'utilisation</h2><p class="sub">Comptes utilisateurs de MyEnergy.</p></div><div class="pb">' + back +
+      msgBox('warn', '<strong>Modèle à faire relire par le propriétaire.</strong> Ce texte est un modèle fourni avec l\'application : les éléments entre crochets [ ] sont à compléter, et l\'ensemble doit être vérifié (si possible par un juriste) avant l\'ouverture au public.') +
+      '<h3>1. Responsable du traitement</h3><p>[Nom de l\'éditeur ou de la société], [adresse], [pays]. Contact pour toute question sur vos données : [adresse e-mail de contact].</p>' +
+      '<h3>2. Données collectées</h3><ul><li><strong>Nom complet</strong>, <strong>adresse e-mail</strong> et <strong>numéro de téléphone</strong> (avec le pays), saisis à l\'inscription ou dans « Mon compte ».</li>' +
+      '<li>Le <strong>mot de passe</strong> : il est conservé uniquement sous forme chiffrée irréversible (hachage) par Supabase ; l\'éditeur ne peut pas le lire.</li>' +
+      '<li>Les dates de création et de mise à jour du compte, et des données techniques de connexion (adresse IP, date, navigateur) conservées par Supabase pour la sécurité du service.</li>' +
+      '<li>Les projets de dimensionnement restent pour l\'instant enregistrés dans votre navigateur (stockage local) et ne sont pas envoyés au serveur.</li></ul>' +
+      '<h3>3. Pourquoi ces données</h3><ul><li>Créer votre compte, vous identifier et sécuriser l\'accès à l\'application.</li><li>Vous envoyer les e-mails nécessaires au compte (confirmation de l\'adresse, réinitialisation du mot de passe, informations importantes sur le service).</li>' +
+      '<li>Vous joindre si nécessaire au sujet de votre compte ou de l\'assistance. Le numéro n\'est pas vérifié par SMS et n\'est pas utilisé pour de la prospection sans votre accord.</li></ul>' +
+      '<p>Base : l\'exécution du service que vous demandez en créant un compte (conditions ci-dessous) et votre consentement, donné en cochant la case d\'acceptation.</p>' +
+      '<h3>4. Où sont stockées les données</h3><p>Chez <strong>Supabase</strong> (prestataire d\'hébergement de la base de données et de l\'authentification), dans un centre de données situé dans l\'<strong>Union européenne</strong> (région [à préciser, par exemple eu-west]). Les données sont donc transférées hors du Togo vers un pays offrant un niveau de protection reconnu. Les e-mails sont envoyés par [fournisseur d\'envoi d\'e-mails, par exemple Brevo]. Les échanges sont chiffrés (HTTPS).</p>' +
+      '<h3>5. Durée de conservation</h3><ul><li>Tant que votre compte est actif.</li><li>Suppression immédiate du compte et du profil lorsque vous utilisez « Supprimer mon compte » (menu du compte, « Mon compte »).</li>' +
+      '<li>Comptes inactifs depuis [3 ans] : supprimés après un e-mail d\'avertissement [à confirmer].</li><li>Journaux techniques : durée limitée fixée par Supabase.</li></ul>' +
+      '<h3>6. Vos droits</h3><p>Conformément à la <strong>loi n° 2019-014 du 29 octobre 2019 relative à la protection des données à caractère personnel</strong> (République togolaise), vous disposez d\'un droit d\'accès, de rectification, d\'opposition et de suppression de vos données. Vous pouvez corriger votre nom et votre téléphone dans « Mon compte », et supprimer votre compte à tout moment. Pour toute autre demande : [adresse e-mail de contact]. Vous pouvez aussi saisir l\'autorité de protection des données à caractère personnel du Togo (IPDCP). Pour les utilisateurs situés dans l\'Union européenne, le Règlement général sur la protection des données (RGPD) s\'applique également.</p>' +
+      '<h3>7. Sécurité et limites</h3><p>Chaque utilisateur ne peut lire et modifier que son propre profil (règles d\'accès de la base). MyEnergy est publiée comme un site statique : le code de l\'application est public. Le compte protège vos données stockées sur le serveur ; il ne rend pas le code de l\'application secret. Ne partagez pas votre mot de passe et déconnectez-vous sur un appareil partagé (« Se déconnecter » efface la session de l\'appareil).</p>' +
+      '<h3>8. Conditions d\'utilisation</h3><ul><li>MyEnergy est un outil d\'<strong>aide à la décision</strong> : ses résultats ne constituent ni un devis ni une étude d\'exécution ; l\'installation relève d\'un électricien qualifié.</li>' +
+      '<li>Le compte est personnel ; vous êtes responsable des informations saisies et de la confidentialité de votre mot de passe.</li><li>L\'éditeur peut suspendre un compte en cas d\'usage abusif ou frauduleux, et faire évoluer le service et ces conditions (les utilisateurs en seront informés).</li>' +
+      '<li>Droit applicable : [droit togolais, à confirmer] ; juridiction compétente : [à préciser].</li></ul>' +
+      '<p class="muted small">Version du modèle : novembre 2026.</p>' + back + '</div></section>';
+  }
+
+  /* ---------- Écran « Mon compte » (connecté) ---------- */
+  function accountScreen() {
+    var u = S.user || {}, sp = splitPhone(u.phone, u.country), off = S.offline;
+    var stat = off ? msgBox('warn', 'Mode hors ligne : dernière vérification en ligne il y a ' + fmtDays((clock() - (S.lastOnline || clock())) / DAY) + ' (accès toléré ' + fmtDays(cfg().grace) + ' au plus). Les modifications nécessitent Internet.') : '';
+    function sec(title, sub, body, cls) { return '<section class="panel' + (cls ? ' ' + cls : '') + '"><div class="ph"><h2>' + title + '</h2>' + (sub ? '<p class="sub">' + sub + '</p>' : '') + '</div><div class="pb">' + body + '</div></section>'; }
+    return '<div class="au-account"><h2 id="au-title" tabindex="-1" class="au-h">Mon compte</h2>' + stat +
+      sec('Informations', 'Adresse e-mail : <strong>' + esc(u.email) + '</strong>' + (S.mock ? ' <span class="tag">client simulé (tests)</span>' : ''),
+        msgLine('profile') + '<form class="au-form" data-auth-form="profile" method="post" novalidate>' +
+        field({ form: 'profile', name: 'name', label: 'Nom complet', auto: 'name', max: 100, value: S.draft['profile.name'] != null ? S.draft['profile.name'] : u.name }) +
+        phoneField('profile', sp) + submitBtn('Enregistrer') + '</form>') +
+      sec('Mot de passe', 'Au moins 8 caractères, avec des lettres et des chiffres.', msgLine('password') +
+        '<form class="au-form" data-auth-form="password" method="post" novalidate>' +
+        field({ form: 'password', name: 'cur', label: 'Mot de passe actuel', pw: true, auto: 'current-password', max: 72 }) +
+        field({ form: 'password', name: 'npw', label: 'Nouveau mot de passe', pw: true, auto: 'new-password', max: 72, meter: true }) +
+        field({ form: 'password', name: 'npw2', label: 'Confirmation', pw: true, auto: 'new-password', max: 72 }) +
+        submitBtn('Changer le mot de passe') + '</form>') +
+      sec('Session', '', '<p>Vous restez connecté sur cet appareil, même après fermeture du navigateur, jusqu\'à ce que vous choisissiez « Se déconnecter ».</p><div class="au-actions"><button type="button" class="btn btn-2" data-act="authLogout">Se déconnecter</button><button type="button" class="btn-link" data-act="authPrivacy">Confidentialité et conditions</button></div>') +
+      sec('Supprimer mon compte', 'Action définitive : votre compte et votre profil seront effacés du serveur. Les projets enregistrés dans ce navigateur ne sont pas concernés.', msgLine('delete') +
+        '<form class="au-form" data-auth-form="delete" method="post" novalidate>' +
+        field({ form: 'delete', name: 'del', label: 'Tapez SUPPRIMER pour confirmer', auto: 'off', max: 20 }) +
+        '<button type="submit" class="btn au-danger-btn"' + (S.busy ? ' disabled' : '') + '>Supprimer définitivement mon compte</button></form>', 'au-danger') + '</div>';
+  }
+  function privacyScreen() { return privacyPanel(false); }
+
+  /* ---------- En-tête : menu du compte ---------- */
+  function initials(n, e) { var p = String(n || '').trim().split(/\s+/).filter(Boolean); return ((p[0] || e || '?')[0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase(); }
+  function headerMenu() {
+    if (!allowed() || !S.user) return '';
+    var u = S.user, first = String(u.name || u.email || 'Compte').trim().split(/\s+/)[0];
+    return '<div class="acct"><button type="button" id="acct-btn" class="btn btn-2 acct-btn" data-act="authMenu" aria-haspopup="true" aria-expanded="' + S.menu + '" aria-controls="acct-menu" aria-label="Compte : ' + esc(u.name || u.email) + '">' +
+      '<span class="acct-av" aria-hidden="true">' + esc(initials(u.name, u.email)) + '</span><span class="acct-nm" aria-hidden="true">' + esc(first) + '</span>' + (S.offline ? '<span class="acct-off" aria-hidden="true">hors ligne</span>' : '') + '</button>' +
+      '<div id="acct-menu" class="acct-menu"' + (S.menu ? '' : ' hidden') + '><div class="acct-id"><strong>' + esc(u.name || '—') + '</strong><span>' + esc(u.email) + '</span><span>' + esc(formatPhone(u.phone, u.country) || 'Téléphone non renseigné') + '</span>' +
+      (S.offline ? '<span class="badge b-warn">Hors ligne : accès toléré</span>' : '') + '</div>' +
+      '<button type="button" class="acct-item" data-act="authAccount">Mon compte</button>' +
+      '<button type="button" class="acct-item" data-act="authPrivacy">Confidentialité et conditions</button>' +
+      '<button type="button" class="acct-item danger" data-act="authLogout">Se déconnecter</button></div></div>';
+  }
+  function gateHeader() {
+    var dark = SD.main && SD.main.currentTheme ? SD.main.currentTheme() === 'dark' : false;
+    return '<div class="hd-in"><span class="brand"><span class="logo-pill">' + (SD.logoImg ? SD.logoImg('logo') : '<strong>MyEnergy</strong>') + '</span></span>' +
+      '<nav class="hd-nav" aria-label="Affichage"><button type="button" class="btn btn-2" data-act="theme" aria-label="Basculer le thème clair / sombre">' + (dark ? 'Thème clair' : 'Thème sombre') + '</button></nav></div>';
+  }
+
+  /* ---------- Peinture et événements ---------- */
+  function paint() {
+    if (!hasDoc()) return;
+    if (S.status === 'in') { if (S.ready && SD.main && SD.main.render) SD.main.render(); return; }
+    paintGate();
+  }
+  function paintGate() {
+    if (!hasDoc()) return;
+    var hd = document.getElementById('hd'), main = document.getElementById('main'); if (!main) return;
+    var ae = document.activeElement, fid = ae && ae.id;
+    if (hd) hd.innerHTML = gateHeader();
+    main.innerHTML = (VIEWS[S.view] || VIEWS.login)();
+    var key = S.view;
+    if (S.painted !== key) { S.painted = key; var h = document.getElementById('au-title'); if (h && key !== 'loading') try { h.focus({ preventScroll: true }); } catch (e) { /* rien */ } try { W.scrollTo(0, 0); } catch (e) { /* rien */ } }
+    else if (fid) { var el = document.getElementById(fid); if (el && el.focus) try { el.focus({ preventScroll: true }); } catch (e) { /* rien */ } }
+  }
+  function focusFirstError() {
+    if (!hasDoc()) return;
+    var el = document.querySelector('#main [aria-invalid="true"]'); if (el) try { el.focus(); } catch (e) { /* rien */ }
+  }
+  function formData(f) { var o = {}; Array.prototype.forEach.call(f.elements, function (el) { if (!el.name) return; o[el.name] = el.type === 'checkbox' ? el.checked : el.value; }); return o; }
+  function onSubmit(kind, f) {
+    var d = formData(f);
+    if (kind === 'login') return signIn(d.email, d.pw);
+    if (kind === 'signup') return signUp(d);
+    if (kind === 'forgot') return resetPassword(d.email);
+    if (kind === 'recovery') return setNewPassword(d.pw, d.pw2);
+    if (kind === 'complete') return updateProfile(d, true);
+    if (kind === 'profile') return updateProfile(d, false);
+    if (kind === 'password') return changePassword(d.cur, d.npw, d.npw2);
+    if (kind === 'delete') return deleteAccount(d.del);
+  }
+  function updateMeter(input) {
+    var id = input.getAttribute('data-meter'), box = id && document.getElementById(id); if (!box) return;
+    var p = passwordCheck(input.value), m = box.querySelector('.pw-meter'), sp = m && m.querySelector('span');
+    if (m) m.setAttribute('data-s', p.score); if (sp) sp.style.width = (input.value ? (p.score + 1) * 20 : 0) + '%';
+    var lb = box.querySelector('.pw-lbl strong'); if (lb) lb.textContent = p.label || '—';
+    p.rules.forEach(function (r) { var li = box.querySelector('[data-rule="' + r.id + '"]'); if (li) { li.className = r.ok ? 'ok' : ''; li.firstChild.textContent = r.ok ? '✓' : '·'; li.lastChild.textContent = ' : ' + (r.ok ? 'respecté' : 'non respecté'); } });
+  }
+  var domOk = false;
+  function installDom() {
+    if (domOk || !hasDoc()) return; domOk = true;
+    document.addEventListener('submit', function (e) {
+      var f = e.target, kind = f && f.getAttribute && f.getAttribute('data-auth-form'); if (!kind) return;
+      e.preventDefault(); if (!S.busy) onSubmit(kind, f);
+    });
+    // Brouillons des formulaires (jamais les mots de passe), jauge de force, aide du téléphone
+    document.addEventListener('input', function (e) {
+      var el = e.target, f = el && el.closest && el.closest('[data-auth-form]'); if (!f || !el.name) return;
+      if (el.type !== 'password') S.draft[f.getAttribute('data-auth-form') + '.' + el.name] = el.type === 'checkbox' ? el.checked : el.value;
+      if (el.getAttribute('data-meter')) updateMeter(el);
+    });
+    document.addEventListener('change', function (e) {
+      var el = e.target, f = el && el.closest && el.closest('[data-auth-form]'); if (!f || !el.name) return;
+      if (el.type !== 'password') S.draft[f.getAttribute('data-auth-form') + '.' + el.name] = el.type === 'checkbox' ? el.checked : el.value;
+      if (el.name === 'country') {
+        var h = document.getElementById(el.getAttribute('data-phone-hint')), c = country(el.value), inp = f.querySelector('input[name="phone"]');
+        if (h) h.textContent = phoneHint(el.value) + ' Le numéro n\'est pas vérifié par SMS.';
+        if (inp && c) inp.placeholder = c[6];
+      }
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && S.menu) { S.menu = false; paint(); var b = document.getElementById('acct-btn'); if (b) b.focus(); } });
+    document.addEventListener('click', function (e) { if (S.menu && e.target && e.target.closest && !e.target.closest('.acct')) { S.menu = false; paint(); } }, true);
+    try { W.addEventListener('online', function () { revalidate(); }); } catch (e) { /* rien */ }
+  }
+  // Actions data-act (aiguillées par SD.main : renvoyer false évite le rendu de l'assistant)
+  var actions = {
+    authView: function (a) { S.view = a || 'login'; S.msg = null; S.errors = {}; S.canResend = false; paint(); return false; },
+    authPw: function (id, btn) {
+      var el = hasDoc() && document.getElementById(id); if (!el) return false;
+      var show = el.type === 'password'; el.type = show ? 'text' : 'password';
+      if (btn) { btn.setAttribute('aria-pressed', String(show)); btn.textContent = show ? 'Masquer' : 'Afficher'; btn.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'); }
+      return false;
+    },
+    authMenu: function () { S.menu = !S.menu; paint(); if (S.menu && hasDoc()) { var f = document.querySelector('#acct-menu .acct-item'); if (f) f.focus(); } return false; },
+    authAccount: function () { S.menu = false; S.msg = null; S.errors = {}; S.msgFor = ''; if (SD.state) SD.state.screen = 'account'; try { W.scrollTo(0, 0); } catch (e) { /* rien */ } },
+    authPrivacy: function () {
+      S.menu = false;
+      if (allowed()) { if (SD.state) SD.state.screen = 'privacy'; try { W.scrollTo(0, 0); } catch (e) { /* rien */ } return; }
+      if (S.view !== 'privacy') S.back = S.view; S.view = 'privacy'; paint(); return false;
+    },
+    authBack: function () { S.view = S.back && S.back !== 'privacy' ? S.back : 'login'; paint(); return false; },
+    authLogout: function () { logout(); return false; },
+    authResend: function () { resend(); return false; },
+    authRetry: function () { S.view = 'loading'; paint(); ensureClient().then(function () { return evaluate(); }); return false; }
+  };
+
+  /* ---------- Aperçu (captures et contrôle de débordement) ---------- */
+  var saved = null;
+  function preview(view, opts) {
+    if (view == null) { if (saved) { Object.assign(S, saved); saved = null; S.painted = ''; paint(); } return; }
+    if (!saved) saved = { status: S.status, view: S.view, msg: S.msg, errors: S.errors, pendingEmail: S.pendingEmail, menu: S.menu };
+    S.status = 'gate'; S.view = view; S.menu = false; S.pendingEmail = S.pendingEmail || 'adresse@exemple.tg';
+    S.errors = opts && opts.errors ? { name: 'Indiquez votre nom complet (2 à 100 caractères).', email: 'Adresse e-mail invalide.', phone: 'Numéro trop court : 8 chiffres attendus pour Togo (+228).', pw: 'Le mot de passe doit contenir au moins 8 caractères, avec des lettres et des chiffres.', pw2: 'Les deux mots de passe ne sont pas identiques.', terms: 'Vous devez accepter les conditions d\'utilisation et la politique de confidentialité.' } : {};
+    S.msg = opts && opts.errors ? { t: 'err', m: 'E-mail ou mot de passe incorrect.' } : null;
+    S.painted = ''; paintGate();
+  }
+  function openMenu(on) { S.menu = !!on; paint(); }
+
+  /* ---------- Test navigateur (SD.selfTest, client simulé uniquement) ---------- */
+  function lum(c) {
+    c = String(c || '').trim(); var m = c.match(/^#([0-9a-f]{6})$/i), rgb;
+    if (m) rgb = [0, 2, 4].map(function (i) { return parseInt(m[1].substr(i, 2), 16); }); else { var p = c.match(/\d+(\.\d+)?/g); rgb = p ? p.slice(0, 3).map(Number) : [0, 0, 0]; }
+    var l = rgb.map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+  }
+  function ratio(a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+  // Fond effectif : premier ancêtre dont le fond n'est pas transparent
+  function bgOf(el) {
+    for (; el && el.nodeType === 1; el = el.parentElement) { var c = getComputedStyle(el).backgroundColor; if (c && c !== 'transparent' && !/^rgba\([^)]*,\s*0\)$/.test(c)) return c; }
+    return '#FFFFFF';
+  }
+  async function selfTest(add) {
+    var T = W.MYENERGY_AUTH_TEST;
+    if (!S.mock || !hasDoc() || !T || !T.testUser) { add('20. Comptes utilisateurs', true, 'non testé : client Supabase réel (ce test déconnecte l\'utilisateur ; il ne s\'exécute qu\'avec le client simulé des tests)'); return; }
+    var u = T.testUser, ok = true, det = [], root = document.documentElement, prevTheme = root.getAttribute('data-theme'), keepScreen = SD.state && SD.state.screen;
+    function chk(c, m) { if (!c) { ok = false; det.push('KO ' + m); } }
+    try {
+      if (!allowed()) await signIn(u.email, u.password);
+      SD.state.screen = 'wizard'; SD.main.render();
+      chk(allowed() && !!document.querySelector('#main .steps') && !document.getElementById('auth-gate'), 'assistant affiché une fois connecté');
+      var b = document.getElementById('acct-btn'); chk(!!b && b.getAttribute('aria-expanded') === 'false', 'bouton du compte dans l\'en-tête');
+      if (b) b.click();
+      var m = document.getElementById('acct-menu'), mt = m ? m.textContent : '';
+      chk(m && !m.hidden && document.getElementById('acct-btn').getAttribute('aria-expanded') === 'true', 'menu du compte ouvert');
+      chk(mt.indexOf(u.name) >= 0 && mt.indexOf(u.email) >= 0 && mt.indexOf(formatPhone(u.phone)) >= 0 && /Mon compte/.test(mt) && /Se déconnecter/.test(mt), 'menu : nom, e-mail, téléphone, Mon compte, Se déconnecter');
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      chk(document.getElementById('acct-menu').hidden, 'Échap ferme le menu');
+      SD.state.screen = 'account'; SD.main.render();
+      chk(!!document.querySelector('form[data-auth-form="profile"]') && !!document.querySelector('form[data-auth-form="delete"]') && !/undefined|NaN/.test(document.getElementById('main').innerHTML), 'écran Mon compte');
+      SD.state.screen = 'wizard'; SD.main.render();
+      await logout();
+      chk(!allowed() && !!document.getElementById('auth-gate') && !document.querySelector('#main .steps') && S.view === 'login' && !lsGet(REC_KEY) && !document.getElementById('acct-btn'), 'déconnexion : retour à l\'écran de connexion, session effacée');
+      var cr = [];
+      ['light', 'dark'].forEach(function (t) {
+        root.setAttribute('data-theme', t);
+        ['login', 'signup'].forEach(function (v) {
+          S.view = v; S.painted = ''; paintGate();
+          var lbl = document.querySelector('.au-card .lbl'), btn = document.querySelector('.au-card .au-submit'), h = document.getElementById('au-title');
+          var r1 = ratio(getComputedStyle(lbl).color, bgOf(lbl)), r2 = ratio(getComputedStyle(btn).color, bgOf(btn)), r3 = ratio(getComputedStyle(h).color, bgOf(h));
+          if (!(r1 >= 4.5 && r2 >= 4.5 && r3 >= 4.5)) chk(false, t + '/' + v + ' contraste ' + [r1, r2, r3].map(function (x) { return x.toFixed(1); }).join('/'));
+          cr.push(t + ' ' + Math.min(r1, r2, r3).toFixed(1));
+        });
+      });
+      det.push('contraste min ' + cr.filter(function (x, i) { return i % 2 === 0; }).join(', '));
+      S.view = 'signup'; paintGate();
+      var sel = document.getElementById('au-signup-country');
+      chk(sel && sel.value === 'TG' && !!document.querySelector('#au-signup-terms') && !!document.querySelector('.au-terms [data-act="authPrivacy"]') && !!document.querySelector('[data-meter]'), 'inscription : pays +228 par défaut, case des conditions, jauge');
+      S.view = 'login'; paintGate();
+      var r = await signIn(u.email, u.password);
+      chk(r.ok && allowed() && !!document.querySelector('#main .steps') && !!readRec(), 'reconnexion : assistant affiché');
+      try {
+        await loadLib();
+        var cl = W.supabase.createClient('https://exemple-test.supabase.co', 'cle-publique-de-test-0123456789', { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+        chk(cl && cl.auth && typeof cl.auth.signInWithPassword === 'function' && typeof cl.rpc === 'function', 'supabase-js chargé');
+        det.push('supabase-js ' + LIB.version + (SD.OFFLINE ? ' intégré' : ' (CDN, SRI)'));
+      } catch (e) { chk(false, 'supabase-js : ' + e.message); }
+    } catch (e) { ok = false; det.push('erreur : ' + e.message); }
+    finally {
+      if (prevTheme) root.setAttribute('data-theme', prevTheme); else root.removeAttribute('data-theme');
+      if (!allowed()) { try { await signIn(u.email, u.password); } catch (e) { /* rien */ } }
+      if (SD.state) SD.state.screen = keepScreen || 'wizard'; S.menu = false;
+      if (SD.main) SD.main.render();
+    }
+    add('20. Comptes : assistant si connecté, menu, déconnexion vers l\'écran de connexion, thèmes', ok, det.join(' ; '));
+  }
+
+  return {
+    start: start, allowed: allowed, headerMenu: headerMenu, accountScreen: accountScreen, privacyScreen: privacyScreen, paintGate: paintGate, actions: actions,
+    signIn: signIn, signUp: signUp, logout: logout, resetPassword: resetPassword, setNewPassword: setNewPassword, updateProfile: updateProfile, changePassword: changePassword, deleteAccount: deleteAccount, resend: resend, revalidate: revalidate,
+    validateSignup: validateSignup, normalizePhone: normalizePhone, formatPhone: formatPhone, passwordCheck: passwordCheck, validEmail: validEmail, errorMessage: errorMessage, isNetwork: isNetwork, graceDecision: graceDecision,
+    COUNTRIES: COUNTRIES, configured: configured, isMock: function () { return S.mock; }, urlHasAuth: function () { return URLI.auth; }, loadLib: loadLib, LIB: LIB, KEYS: { rec: REC_KEY, sb: SB_KEY },
+    preview: preview, previewViews: function () { return ['loading', 'unconfigured', 'login', 'signup', 'signupDone', 'forgot', 'forgotSent', 'recovery', 'complete', 'blocked', 'privacy']; }, openMenu: openMenu, selfTest: selfTest,
+    state: function () { return { status: S.status, view: S.view, offline: S.offline, user: S.user ? Object.assign({}, S.user) : null, msg: S.msg ? S.msg.m : '', errors: Object.assign({}, S.errors) }; },
+    _setClock: function (fn) { clock = typeof fn === 'function' ? fn : function () { return Date.now(); }; }
+  };
+})();
+
+;
+
 /* ===== 06_import.js ===== */
 /* ==========================================================================
    SD.imp : import de fiches techniques (onduleur, batterie, module).
@@ -6704,11 +7718,14 @@ SD.main = (function () {
     return '<div class="hd-in"><a class="brand" href="#" data-act="home" title="Accueil"><span class="logo-pill">' + SD.logoImg('logo') + '</span></a>' +
       (SD.OFFLINE ? '<span class="badge b-ok off-badge" title="Exports PDF et Word, import PDF et polices intégrés : aucune connexion nécessaire.">✓ Version hors ligne complète</span>' : '') +
       '<nav class="hd-nav" aria-label="Navigation principale">' +
-      '<button type="button" class="btn btn-2' + (st.screen !== 'db' ? ' on' : '') + '" data-act="screen" data-arg="wizard">Dimensionnement</button>' +
+      '<button type="button" class="btn btn-2' + (isWizard(st) ? ' on' : '') + '" data-act="screen" data-arg="wizard">Dimensionnement</button>' +
       '<button type="button" class="btn btn-2' + (st.screen === 'db' ? ' on' : '') + '" data-act="screen" data-arg="db">Bases de données</button>' +
       '<button type="button" class="btn btn-2" data-act="selfTest">Tests</button>' +
-      '<button type="button" class="btn btn-2" data-act="theme" aria-label="Basculer le thème clair / sombre">' + (currentTheme() === 'dark' ? 'Thème clair' : 'Thème sombre') + '</button></nav></div>';
+      '<button type="button" class="btn btn-2" data-act="theme" aria-label="Basculer le thème clair / sombre">' + (currentTheme() === 'dark' ? 'Thème clair' : 'Thème sombre') + '</button>' +
+      (SD.auth ? SD.auth.headerMenu() : '') + '</nav></div>'; // menu du compte (src/05c_auth.js)
   }
+  // Écrans hors assistant : bases de données, compte (Mon compte, Confidentialité)
+  function isWizard(st) { return ['db', 'account', 'privacy'].indexOf(st.screen) < 0 || ((st.screen === 'account' || st.screen === 'privacy') && !SD.auth); }
   // Barre d'étapes : toujours une seule ligne horizontale (jamais empilée ni sur plusieurs lignes).
   // Si elle ne tient pas dans la largeur : défilement horizontal, bords estompés et flèches ‹ › ; l'étape active est amenée à l'écran.
   function stepper(st, steps) {
@@ -6765,11 +7782,13 @@ SD.main = (function () {
     return H.panel('Bases de données', 'Chaque fiche indique sa provenance ; les fiches non vérifiées sont signalées à leur sélection. Les modifications sont enregistrées dans ce navigateur.', h);
   }
   function render() {
+    // Accès réservé aux utilisateurs connectés : sinon écran d'accès (connexion, inscription...)
+    if (SD.auth && !SD.auth.allowed()) { SD.auth.paintGate(); return; }
     var st = SD.state, ae = document.activeElement, focusKey = ae && (ae.getAttribute('data-k') || ae.id), main = document.getElementById('main');
     document.getElementById('hd').innerHTML = header();
-    main.innerHTML = st.screen === 'db' ? dbScreen() : wizard(st);
-    if (st.screen !== 'db') { SD.steps.after(st, st.step); stepsFit(true); }
-    else { SD.imp.bind(main, render); var dq = document.getElementById('db-q'); if (dq) dq.oninput = function (e) { dbUi.q = e.target.value; clearTimeout(render._q); render._q = setTimeout(function () { render(); var x = document.getElementById('db-q'); if (x) { x.focus(); x.setSelectionRange(x.value.length, x.value.length); } }, 300); }; }
+    main.innerHTML = st.screen === 'db' ? dbScreen() : isWizard(st) ? wizard(st) : st.screen === 'account' ? SD.auth.accountScreen() : SD.auth.privacyScreen();
+    if (isWizard(st)) { SD.steps.after(st, st.step); stepsFit(true); }
+    else if (st.screen === 'db') { SD.imp.bind(main, render); var dq = document.getElementById('db-q'); if (dq) dq.oninput = function (e) { dbUi.q = e.target.value; clearTimeout(render._q); render._q = setTimeout(function () { render(); var x = document.getElementById('db-q'); if (x) { x.focus(); x.setSelectionRange(x.value.length, x.value.length); } }, 300); }; }
     if (focusKey) { var el = main.querySelector('[data-k="' + focusKey + '"]') || document.getElementById(focusKey); if (el && el.focus) try { el.focus({ preventScroll: true }); } catch (e) { /* rien */ } }
   }
   /* ---------- Liaison des champs ---------- */
@@ -6900,7 +7919,7 @@ SD.main = (function () {
     var b = e.target.closest && e.target.closest('[data-act]');
     if (b) {
       e.preventDefault();
-      var an = b.getAttribute('data-act'), fn = A[an] || (SD.v2 && SD.v2.actions[an]) || (SD.siteUI && SD.siteUI.actions[an]); // actions v2 (variantes) et localisation du site
+      var an = b.getAttribute('data-act'), fn = A[an] || (SD.v2 && SD.v2.actions[an]) || (SD.siteUI && SD.siteUI.actions[an]) || (SD.auth && SD.auth.actions[an]); // actions v2 (variantes), localisation du site, comptes
       if (fn && fn(b.getAttribute('data-arg') || '', b) !== false) { SD.save(); render(); }
       return;
     }
@@ -6917,12 +7936,18 @@ SD.main = (function () {
     document.addEventListener('click', onClick);
     window.addEventListener('resize', function () { clearTimeout(stepsFit._t); stepsFit._t = setTimeout(function () { stepsFit(true); }, 120); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.querySelectorAll('.tip.open').forEach(function (x) { x.classList.remove('open'); }); });
-    // Ouverture directe : #mode=pompage&type=immeuble&step=champ&screen=db&theme=dark (tests, démonstration)
+    // Ouverture directe : #mode=pompage&type=immeuble&step=champ&screen=db&theme=dark (tests, démonstration).
+    // Ignorée pour une adresse de retour d'e-mail Supabase (#access_token=...&type=recovery...).
+    var hp = {};
     try {
-      var hp = {}; location.hash.replace(/^#/, '').split('&').forEach(function (kv) { var a = kv.split('='); if (a[1]) hp[a[0]] = decodeURIComponent(a[1]); });
-      if (hp.mode) SD.state.projet.mode = hp.mode; if (hp.type) SD.state.projet.type = hp.type; if (hp.step) SD.state.step = hp.step; if (hp.screen) SD.state.screen = hp.screen;
+      if (!(SD.auth && SD.auth.urlHasAuth())) location.hash.replace(/^#/, '').split('&').forEach(function (kv) { var a = kv.split('='); if (a[1]) hp[a[0]] = decodeURIComponent(a[1]); });
       if (hp.theme) document.documentElement.setAttribute('data-theme', hp.theme);
     } catch (e) { /* rien */ }
+    // Écran d'accès d'abord (SD.auth, src/05c_auth.js) ; l'assistant n'est affiché qu'une fois l'utilisateur connecté
+    if (SD.auth) SD.auth.start(function () { afterLogin(hp); }); else afterLogin(hp);
+  }
+  function afterLogin(hp) {
+    try { if (hp.mode) SD.state.projet.mode = hp.mode; if (hp.type) SD.state.projet.type = hp.type; if (hp.step) SD.state.step = hp.step; if (hp.screen) SD.state.screen = hp.screen; } catch (e) { /* rien */ }
     render();
     // #anchor=schema (captures d'écran) : copie du schéma unifilaire en tête de l'étape
     if (hp && hp.anchor === 'schema') { var sw = document.querySelector('.schema-wrap'), stp = document.getElementById('step'); if (sw && stp) { var pn = document.createElement('section'); pn.className = 'panel'; pn.innerHTML = '<div class="ph"><h2>Schéma unifilaire</h2><p class="sub">Généré à partir de la configuration retenue.</p></div><div class="pb">' + sw.outerHTML + '</div>'; stp.insertBefore(pn, stp.firstChild); } }
@@ -6931,7 +7956,7 @@ SD.main = (function () {
     // Ouverture avec #selftest : lance les tests de cohérence automatiquement
     try { if (/selftest/i.test(location.hash)) setTimeout(function () { SD.selfTest({ noExport: /noexport/i.test(location.hash) }); }, 50); } catch (e) { /* rien */ }
   }
-  return { boot: boot, render: render, actions: A, currentTheme: currentTheme, applyTheme: applyTheme, focusField: focusField, stepsFit: stepsFit };
+  return { boot: boot, render: render, header: header, actions: A, currentTheme: currentTheme, applyTheme: applyTheme, focusField: focusField, stepsFit: stepsFit };
 })();
 
 /* Passage automatique -> manuel : les champs reprennent la configuration retenue par le moteur
@@ -7167,6 +8192,8 @@ SD.selfTest = async function (opts) {
     U.confirm = conf19; SD.state = keep19; SD._cache.key = '';
     add('19. Projet JSON : export, import, migration des identifiants, fichier invalide refusé', ok19 && badFile, oldId ? oldId + ' -> ' + al19[oldId] : 'aucun alias d\'onduleur');
   } catch (e) { U.confirm = conf19 || U.confirm; add('19. Projet JSON', false, e.message); }
+  // 20. Comptes utilisateurs (client simulé des tests uniquement ; src/05c_auth.js)
+  if (SD.auth && SD.auth.selfTest) { try { await SD.auth.selfTest(add); } catch (e) { add('20. Comptes utilisateurs', false, e.message); } }
   SD.state = saved; SD._cache.key = '';
   res.sort(function (a, b) { return a.n.localeCompare(b.n, 'fr', { numeric: true }); });
   var box = document.getElementById('selftest');
