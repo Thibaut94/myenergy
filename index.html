@@ -4817,9 +4817,9 @@ SD.auth = (function () {
   /* ---------- État ---------- */
   var S = { status: 'init', view: 'loading', back: 'login', msg: null, errors: {}, busy: false, user: null, offline: false, client: null, mock: false,
     draft: {}, menu: false, pendingEmail: '', canResend: false, recovery: false, ready: false, onReady: null, painted: '', subscribed: false,
-    welcome: false, lastToast: '', linkErr: '', resendAt: 0, pollStart: 0, pollInterval: 5000, lastOtp: '' };
+    welcome: false, lastToast: '', linkErr: '', resendAt: 0, pollStart: 0, pollBackoff: 1, lastPoll: 0, lastOtp: '' };
   // Attente de confirmation : identifiants gardés UNIQUEMENT en mémoire (jamais dans un stockage), effacés à l'arrêt
-  var creds = null, pollT = null, POLL = { interval: 5000, max: 10 * 60000, auto: true }, RESEND_COOLDOWN = 60000;
+  var creds = null, pollT = null, POLL = { fast: 15000, slow: 30000, fastFor: 3 * 60000, max: 10 * 60000, minGap: 10000, auto: true }, RESEND_COOLDOWN = 60000;
   function allowed() { return S.status === 'in'; }
 
   /* ---------- Client Supabase ---------- */
@@ -5035,12 +5035,15 @@ SD.auth = (function () {
     return { ok: true };
   }
   /* ---------- Attente de confirmation : code, lien ouvert ailleurs, renvoi ---------- */
-  function startWaiting(email, pw) { stopWaiting(); creds = { email: email, pw: pw }; S.pollStart = clock(); S.pollInterval = POLL.interval; schedulePoll(); }
+  function startWaiting(email, pw) { stopWaiting(); creds = { email: email, pw: pw }; S.pollStart = clock(); S.pollBackoff = 1; S.lastPoll = 0; schedulePoll(); }
+  // Rythme sous la limite par défaut de Supabase (~30 connexions / 5 min / IP) : 15 s pendant 3 min, puis 30 s,
+  // 10 min au plus (~16 requêtes / 5 min, retours sur l'onglet compris : 1 / 10 s au plus) ; doublé à chaque réponse 429 (60 s au plus)
+  function pollDelay() { var base = clock() - S.pollStart < POLL.fastFor ? POLL.fast : POLL.slow; return Math.min(60000, base * (S.pollBackoff || 1)); }
   function stopWaiting() { creds = null; clearTimeout(pollT); pollT = null; }
   function schedulePoll() {
     clearTimeout(pollT); pollT = null;
-    if (!creds || !POLL.auto || !POLL.interval) return;
-    pollT = setTimeout(function () { pollTick().then(schedulePoll, schedulePoll); }, S.pollInterval || POLL.interval);
+    if (!creds || !POLL.auto) return;
+    pollT = setTimeout(function () { pollTick().then(schedulePoll, schedulePoll); }, pollDelay());
   }
   function waiting() { return S.status !== 'in' && (S.view === 'signupDone' || (S.view === 'privacy' && S.back === 'signupDone')); }
   // Un passage : session déjà présente dans ce navigateur (autre onglet) ? sinon connexion silencieuse
@@ -5049,18 +5052,22 @@ SD.auth = (function () {
     if (!creds || !waiting()) { stopWaiting(); return false; }
     if (clock() - S.pollStart > POLL.max) { stopWaiting(); return false; }
     if (hasDoc() && document.visibilityState === 'hidden') return false;
-    if (S.busy || !(await ensureClient())) return false;
+    if (S.busy || clock() - S.lastPoll < POLL.minGap) return false; // jamais deux tentatives à moins de 10 s
+    if (!(await ensureClient())) return false;
     var c = S.client, gs = await safeCall(function () { return c.auth.getSession(); });
     if (gs.data && gs.data.session) { await confirmedElsewhere(); return true; }
     var cr = creds; if (!cr) return false;
+    S.lastPoll = clock();
     var r = await safeCall(function () { return c.auth.signInWithPassword({ email: cr.email, password: cr.pw }); });
     if (!waiting()) return false;
     if (r.data && r.data.session) { stopWaiting(); S.welcome = true; await enterOnline(r.data.session, r.data.user || r.data.session.user); return true; }
     var e = r.error || {};
-    if (e.status === 429 || /rate_limit/.test(e.code || '')) S.pollInterval = Math.min(60000, (S.pollInterval || POLL.interval) * 2); // ralentit si limite atteinte
+    if (e.status === 429 || /rate_limit/.test(e.code || '')) S.pollBackoff = Math.min(4, (S.pollBackoff || 1) * 2); // ralentit si la limite est atteinte
     else if (e.code === 'invalid_credentials' || /invalid login/i.test(e.message || '')) stopWaiting();
     return false;
   }
+  // Onglet de nouveau visible : tentative immédiate, au plus une toutes les 10 s (minGap dans pollTick)
+  function onVisible() { if (!creds || !waiting()) return Promise.resolve(false); return pollTick(); }
   async function confirmedElsewhere() {
     if (!waiting()) return;
     stopWaiting(); S.welcome = true;
@@ -5480,7 +5487,7 @@ SD.auth = (function () {
     // Autre onglet du même navigateur : la session apparaît dans le stockage -> entrée automatique
     try { W.addEventListener('storage', function (e) { if (e.key === SB_KEY && e.newValue && waiting()) confirmedElsewhere(); }); } catch (e) { /* rien */ }
     // Onglet de nouveau visible : vérification immédiate
-    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && creds && waiting()) pollTick(); });
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') onVisible(); });
     // Décompte du bouton « Renvoyer » (60 s)
     setInterval(function () { var b = document.getElementById('au-resend'); if (!b || S.status === 'in') return; var left = resendLeft(); b.disabled = S.busy || left > 0; b.textContent = resendLabel(b.classList.contains('btn-link') ? 'Renvoyer' : 'Renvoyer l\'e-mail'); }, 1000);
     document.addEventListener('change', function (e) {
@@ -5606,7 +5613,7 @@ SD.auth = (function () {
     COUNTRIES: COUNTRIES, configured: configured, isMock: function () { return S.mock; }, urlHasAuth: function () { return URLI.auth; }, loadLib: loadLib, LIB: LIB, KEYS: { rec: REC_KEY, sb: SB_KEY },
     preview: preview, previewViews: function () { return ['loading', 'unconfigured', 'login', 'signup', 'signupDone', 'linkError', 'forgot', 'forgotSent', 'recovery', 'complete', 'blocked', 'privacy']; }, openMenu: openMenu, selfTest: selfTest,
     state: function () { return { status: S.status, view: S.view, offline: S.offline, user: S.user ? Object.assign({}, S.user) : null, msg: S.msg ? S.msg.m : '', errors: Object.assign({}, S.errors), pendingEmail: S.pendingEmail, toast: S.lastToast, waiting: !!creds, resendLeft: resendLeft() }; },
-    verifyCode: verifyCode, _pollTick: pollTick, _setPoll: function (o) { Object.assign(POLL, o || {}); },
+    verifyCode: verifyCode, _pollTick: pollTick, _onVisible: onVisible, _pollDelay: pollDelay, _setPoll: function (o) { Object.assign(POLL, o || {}); },
     _setClock: function (fn) { clock = typeof fn === 'function' ? fn : function () { return Date.now(); }; }
   };
 })();
