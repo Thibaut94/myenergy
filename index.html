@@ -296,6 +296,13 @@ div.st-head{display:flex;gap:8px;align-items:center}
 .au-alt{margin:4px 0 0;text-align:center;color:var(--muted)}
 .au-foot{text-align:center;margin:8px 0 0}
 .au-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.au-lead{margin:0;font-size:1rem}
+.au-otp-alt{border:1px solid var(--line);border-radius:8px;padding:0 12px}
+.au-otp-alt>summary{cursor:pointer;min-height:40px;display:flex;align-items:center;font-weight:600;color:var(--primary)}
+.au-otp-alt[open]{padding-bottom:12px}
+.au-otp-in{font-family:var(--f-mono)!important;font-size:1.25rem!important;letter-spacing:.3em;text-align:center}
+.au-wait-links{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;justify-content:center;margin:0;color:var(--muted)}
+.au-wait-links .btn-link:disabled{color:var(--muted);text-decoration:none;cursor:default}
 .au-loading{text-align:center;color:var(--muted);padding:48px 0}
 .au-steps{padding-left:22px;margin:4px 0}.au-steps li{margin:6px 0}
 .au-code{font-family:var(--f-mono);font-size:.86em;background:var(--surface2);border:1px solid var(--line);padding:0 5px;border-radius:4px;overflow-wrap:anywhere}
@@ -2020,6 +2027,10 @@ SD.logoPng = function () { return Promise.resolve({ data: SD.logo, w: SD.logoSiz
 
    offlineGraceDays : nombre de jours pendant lesquels la version hors ligne reste utilisable sans
                       réseau après la dernière vérification en ligne réussie (session expirée).
+   codeInEmail      : false (défaut) -> l'écran d'attente met en avant « Cliquez sur le lien reçu par e-mail », le champ
+                      du code est replié ; true -> le code est l'action principale. Ne passez à true qu'après avoir
+                      installé un SMTP personnalisé ET le modèle d'e-mail avec {{ .Token }} (supabase/LISEZMOI.md) :
+                      le modèle par défaut de Supabase ne contient que le lien.
    siteUrl          : adresse publique de l'application ; les liens des e-mails (confirmation,
                       mot de passe oublié) y renvoient. Elle doit figurer dans les « Redirect URLs »
                       de Supabase (Authentication -> URL Configuration).
@@ -2029,6 +2040,7 @@ SD.authConfig = {
   url: "https://czyclhwiobqrotecqrgt.supabase.co",
   anonKey: "sb_publishable_XHaX2xRhHua40zPIV-DCyA_jwawhZti",
   offlineGraceDays: 30,
+  codeInEmail: false,
   siteUrl: "https://thibaut94.github.io/myenergy/"
 };
 
@@ -4567,13 +4579,13 @@ SD.auth = (function () {
     // Empreinte SRI du fichier figé dans vendor/supabase-js-2.118.0.umd.js (mêmes octets sur jsDelivr et unpkg)
     sri: 'sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK'
   };
-  var REC_KEY = 'myenergy.auth.v1', SB_KEY = 'myenergy.sb.auth', DAY = 86400000;
+  var REC_KEY = 'myenergy.auth.v1', SB_KEY = 'myenergy.sb.auth', PENDING_KEY = 'myenergy.auth.pending', DAY = 86400000;
   var clock = function () { return Date.now(); };
 
   /* ---------- Configuration ---------- */
   function cfg() {
     var c = SD.authConfig || {}, g = Number(c.offlineGraceDays);
-    return { url: String(c.url || '').trim(), anonKey: String(c.anonKey || '').trim(), grace: isFinite(g) && g >= 0 ? g : 30, siteUrl: String(c.siteUrl || '').trim() };
+    return { url: String(c.url || '').trim(), anonKey: String(c.anonKey || '').trim(), grace: isFinite(g) && g >= 0 ? g : 30, siteUrl: String(c.siteUrl || '').trim(), codeInEmail: c.codeInEmail === true };
   }
   // Clé secrète collée par erreur (sb_secret_... ou JWT de rôle service_role) : refusée, jamais utilisée
   function secretKey(k) {
@@ -4584,21 +4596,36 @@ SD.auth = (function () {
   function configured() { var c = cfg(); return /^https:\/\/[^\s/]+\.[^\s/]+/.test(c.url) && c.anonKey.length > 20 && !secretKey(c.anonKey); }
   function testHook() { var h = W.MYENERGY_AUTH_TEST; return h && typeof h === 'object' && typeof h.createClient === 'function' ? h : null; }
 
-  /* ---------- Adresse d'arrivée (liens des e-mails Supabase, flux implicite) ---------- */
-  // Lue au chargement du module, avant que l'application ou supabase-js ne modifie l'adresse.
+  /* ---------- Adresse d'arrivée (liens des e-mails Supabase) ---------- */
+  // Lue au chargement du module, avant que l'application ou supabase-js ne modifie l'adresse. Trois formats :
+  //  - flux implicite (choisi, voir clientOptions) : #access_token=...&type=signup|recovery -> detectSessionInUrl ;
+  //  - lien « token_hash » (modèle d'e-mail personnalisé) : ?token_hash=...&type=signup|email|recovery -> verifyOtp ;
+  //  - flux PKCE : ?code=... -> exchangeCodeForSession (n'aboutit que dans le navigateur de l'inscription) ;
+  //  - erreur (lien expiré ou déjà utilisé) : #error=...&error_code=otp_expired&error_description=...
   var URLI = (function () {
-    var out = { auth: false, recovery: false, error: null };
+    var out = { auth: false, implicit: false, recovery: false, confirm: false, error: null, type: '', tokenHash: '', code: '' };
     try {
-      var h = String((W.location && W.location.hash) || '').replace(/^#/, ''), q = String((W.location && W.location.search) || '').replace(/^\?/, ''), p = {};
-      (h + '&' + q).split('&').forEach(function (kv) { var i = kv.indexOf('='); if (i > 0) { try { p[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' ')); } catch (e) { /* rien */ } } });
-      out.auth = !!(p.access_token || p.refresh_token || p.error_code || (p.error && p.error_description));
-      out.recovery = p.type === 'recovery';
+      var h = String((W.location && W.location.hash) || '').replace(/^#/, ''), q = String((W.location && W.location.search) || '').replace(/^\?/, ''), p = {}, pq = {};
+      function parse(str, o) { str.split('&').forEach(function (kv) { var i = kv.indexOf('='); if (i > 0) { try { o[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' ')); } catch (e) { /* rien */ } } }); }
+      parse(h + '&' + q, p); parse(q, pq);
+      out.implicit = !!(p.access_token || p.refresh_token);
+      out.tokenHash = /^[\w-]{6,}$/.test(p.token_hash || '') ? p.token_hash : '';
+      out.code = /^[\w-]{8,}$/.test(pq.code || '') ? pq.code : '';
+      out.auth = !!(out.implicit || out.tokenHash || out.code || p.error_code || (p.error && p.error_description));
+      out.type = out.auth ? String(p.type || '') : '';
+      out.recovery = out.type === 'recovery';
+      out.confirm = out.auth && /^(signup|email|invite)$/.test(out.type);
       if (p.error_code || p.error_description) out.error = { code: p.error_code || p.error || '', message: p.error_description || '' };
     } catch (e) { /* rien */ }
     return out;
   })();
+  // Retire jetons et codes de l'adresse (history.replaceState), en gardant les autres paramètres
   function cleanUrl() {
-    try { if (URLI.auth && W.history && W.history.replaceState && W.location) W.history.replaceState(null, '', W.location.pathname + W.location.search.replace(/[?&](error|error_code|error_description)=[^&]*/g, '')); } catch (e) { /* rien */ }
+    try {
+      if (!URLI.auth || !W.history || !W.history.replaceState || !W.location) return;
+      var keep = String(W.location.search || '').replace(/^\?/, '').split('&').filter(function (kv) { return kv && !/^(token_hash|type|code|error|error_code|error_description|access_token|refresh_token|expires_in|expires_at|token_type|provider_token|provider_refresh_token)=/.test(kv); });
+      W.history.replaceState(null, '', W.location.pathname + (keep.length ? '?' + keep.join('&') : ''));
+    } catch (e) { /* rien */ }
   }
 
   /* ---------- Stockage local protégé ---------- */
@@ -4616,9 +4643,9 @@ SD.auth = (function () {
   function writeRec(r) { lsSet(REC_KEY, r); }
   // Déconnexion : efface la session Supabase, le profil en cache et la trace de dernière vérification
   function purgeLocal() {
-    [REC_KEY, SB_KEY, SB_KEY + '-code-verifier', SB_KEY + '-user'].forEach(lsDel);
+    [REC_KEY, SB_KEY, PENDING_KEY, SB_KEY + '-code-verifier', SB_KEY + '-user'].forEach(lsDel);
     try { var s = ls(), del = []; for (var i = 0; s && i < s.length; i++) { var k = s.key(i); if (/^sb-.*-auth-token/.test(k || '')) del.push(k); } del.forEach(lsDel); } catch (e) { /* rien */ }
-    S.draft = {};
+    S.draft = {}; stopWaiting(); S.pendingEmail = '';
   }
 
   /* ---------- Outils ---------- */
@@ -4733,14 +4760,13 @@ SD.auth = (function () {
     return { ok: ok, score: pw ? score : 0, label: pw ? ['Très faible', 'Faible', 'Moyenne', 'Bonne', 'Excellente'][score] : '', rules: rules, msg: msg };
   }
   function validName(n) { n = String(n || '').trim().replace(/\s+/g, ' '); return n.length >= 2 && n.length <= 100 ? n : null; }
-  // Inscription : {name, email, country, phone, pw, pw2, terms} -> {ok, errors, name, email, phone, country}
+  // Inscription : {name, email, country, phone, pw, terms} (pas de confirmation : œil afficher / masquer) -> {ok, errors, name, email, phone, country}
   function validateSignup(f) {
     f = f || {}; var er = {}, out = {};
     out.name = validName(f.name); if (!out.name) er.name = 'Indiquez votre nom complet (2 à 100 caractères).';
     out.email = normEmail(f.email); if (!validEmail(out.email)) er.email = 'Adresse e-mail invalide.';
     var ph = normalizePhone(f.country || 'TG', f.phone); if (!ph.ok) er.phone = ph.msg; else { out.phone = ph.e164; out.country = ph.country; }
     var pc = passwordCheck(f.pw, out.email); if (!pc.ok) er.pw = pc.msg;
-    if (!f.pw2) er.pw2 = 'Confirmez le mot de passe.'; else if (f.pw2 !== f.pw) er.pw2 = 'Les deux mots de passe ne sont pas identiques.';
     if (!f.terms) er.terms = 'Vous devez accepter les conditions d\'utilisation et la politique de confidentialité.';
     out.errors = er; out.ok = Object.keys(er).length === 0; return out;
   }
@@ -4763,7 +4789,8 @@ SD.auth = (function () {
     if (st === 429 || /rate_limit/.test(code) || /rate limit|too many requests|only request this after/i.test(m)) return 'Trop de tentatives en peu de temps : patientez quelques minutes avant de réessayer.';
     if (code === 'same_password' || /should be different from the old/i.test(m)) return 'Le nouveau mot de passe doit être différent de l\'ancien.';
     if (code === 'weak_password' || /password should/i.test(m)) return 'Mot de passe trop faible : au moins 8 caractères, avec des lettres et des chiffres.';
-    if (code === 'otp_expired' || /link is invalid or has expired|token has expired/i.test(m)) return 'Ce lien est invalide ou a expiré : demandez un nouvel e-mail.';
+    if (code === 'pkce_other_browser' || e.name === 'AuthPKCECodeVerifierMissingError' || /code verifier/i.test(m)) return 'Ce lien doit être ouvert dans le navigateur utilisé pour l\'inscription. Saisissez plutôt le code reçu, ou demandez un nouvel e-mail.';
+    if (code === 'otp_expired' || /link is invalid or has expired|token has expired|expired or is invalid/i.test(m)) return 'Ce lien est invalide, a expiré ou a déjà été utilisé : demandez un nouvel e-mail.';
     if (code === 'email_address_invalid' || /email address .*invalid|invalid email/i.test(m)) return 'Adresse e-mail refusée : vérifiez-la.';
     if (code === 'signup_disabled' || /signups not allowed/i.test(m)) return 'Les inscriptions sont fermées pour le moment.';
     if (code === 'user_not_found' || /user .*not (be )?found|does not exist/i.test(m) && /user|sub claim/i.test(m)) return 'Ce compte n\'existe plus : reconnectez-vous ou créez un nouveau compte.';
@@ -4789,10 +4816,18 @@ SD.auth = (function () {
 
   /* ---------- État ---------- */
   var S = { status: 'init', view: 'loading', back: 'login', msg: null, errors: {}, busy: false, user: null, offline: false, client: null, mock: false,
-    draft: {}, menu: false, pendingEmail: '', canResend: false, recovery: false, ready: false, onReady: null, painted: '', subscribed: false };
+    draft: {}, menu: false, pendingEmail: '', canResend: false, recovery: false, ready: false, onReady: null, painted: '', subscribed: false,
+    welcome: false, lastToast: '', linkErr: '', resendAt: 0, pollStart: 0, pollInterval: 5000, lastOtp: '' };
+  // Attente de confirmation : identifiants gardés UNIQUEMENT en mémoire (jamais dans un stockage), effacés à l'arrêt
+  var creds = null, pollT = null, POLL = { interval: 5000, max: 10 * 60000, auto: true }, RESEND_COOLDOWN = 60000;
   function allowed() { return S.status === 'in'; }
 
   /* ---------- Client Supabase ---------- */
+  // flowType 'implicit' (choix délibéré) : le lien de confirmation renvoie #access_token=... que detectSessionInUrl
+  // transforme en session DANS N'IMPORTE QUEL navigateur. Avec PKCE, le lien (?code=...) n'aboutit que dans le
+  // navigateur qui a fait l'inscription (le « code verifier » y est stocké) : un lien ouvert depuis l'application
+  // de messagerie du téléphone échouerait. Le lien token_hash (modèle personnalisé) et le code à 6 / 8 chiffres
+  // fonctionnent aussi partout ; ?code=... reste accepté (exchangeCodeForSession) pour les anciens liens.
   function clientOptions() {
     return { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: sbStorage, storageKey: SB_KEY, flowType: 'implicit' } };
   }
@@ -4836,6 +4871,8 @@ SD.auth = (function () {
   }
   function onEvent(ev, session) {
     if (ev === 'PASSWORD_RECOVERY') { S.recovery = true; toGate('recovery'); return; }
+    // Confirmation faite dans un autre onglet du même navigateur (supabase-js diffuse la session entre onglets)
+    if (ev === 'SIGNED_IN' && session && S.status !== 'in' && S.view === 'signupDone' && !S.busy) { confirmedElsewhere(); return; }
     if (ev === 'TOKEN_REFRESHED' && session && S.user) { var r = readRec(); if (r && r.uid === S.user.id) { r.lastOnline = clock(); r.sessionExp = (session.expires_at || 0) * 1000; writeRec(r); } if (S.offline) { S.offline = false; paint(); } return; }
     // Fin de session imposée (jeton révoqué, déconnexion depuis un autre onglet) : vérifiée avant d'agir,
     // un événement tardif ne doit pas déconnecter une session ouverte entre-temps
@@ -4855,12 +4892,33 @@ SD.auth = (function () {
     var hook = testHook();
     if (!hook && !configured()) { S.view = 'unconfigured'; paint(); return S.view; }
     S.mock = !!hook;
-    if (URLI.error) S.msg = { t: 'err', m: errorMessage(URLI.error) };
+    if (URLI.error) S.linkErr = errorMessage(URLI.error);
     if (URLI.recovery) S.recovery = true;
+    if (URLI.confirm) S.welcome = true; // lien de confirmation : accueil « Adresse e-mail confirmée — bienvenue »
+    var pend = lsGet(PENDING_KEY); if (pend && pend.email) S.pendingEmail = pend.email;
     try { S.client = await makeClient(); } catch (e) { S.client = null; }
     subscribe();
+    if (S.client) await handleUrl(S.client);
     await evaluate();
     return S.status === 'in' ? 'in' : S.view;
+  }
+  // Liens token_hash (verifyOtp) et PKCE (exchangeCodeForSession) ; le flux implicite est traité par supabase-js
+  async function handleUrl(c) {
+    if (URLI.tokenHash) {
+      var ty = /^(signup|email|recovery|invite|magiclink|email_change)$/.test(URLI.type) ? URLI.type : 'email';
+      var vr = await safeCall(function () { return c.auth.verifyOtp({ token_hash: URLI.tokenHash, type: ty }); });
+      cleanUrl();
+      if (vr.error) { S.welcome = false; S.recovery = false; S.linkErr = errorMessage(vr.error); }
+      else if (ty === 'recovery') S.recovery = true; else S.welcome = true;
+    } else if (URLI.code) {
+      var gs0 = await safeCall(function () { return c.auth.getSession(); }); // supabase-js l'a peut-être déjà échangé
+      if (!(gs0.data && gs0.data.session)) {
+        var ex = await safeCall(function () { return c.auth.exchangeCodeForSession(URLI.code); });
+        if (ex.error) { S.welcome = false; S.linkErr = errorMessage(isNetwork(ex.error) ? ex.error : { code: 'pkce_other_browser' }); }
+        else if (!URLI.recovery) S.welcome = true;
+      }
+      cleanUrl();
+    }
   }
   async function evaluate() {
     var rec = readRec(), c = S.client;
@@ -4868,6 +4926,7 @@ SD.auth = (function () {
     var gs = await safeCall(function () { return c.auth.getSession(); });
     cleanUrl();
     var session = gs.data && gs.data.session;
+    if (!session) S.welcome = false;
     if (session && S.recovery) { toGate('recovery'); return; }
     if (session) {
       var gu = await safeCall(function () { return c.auth.getUser(); }), user = gu.data && gu.data.user;
@@ -4884,6 +4943,7 @@ SD.auth = (function () {
     if (gs.error && isNetwork(gs.error)) { offlineDecision(rec); return; }
     if (rec && W.navigator && W.navigator.onLine === false) { offlineDecision(rec); return; }
     if (rec) lsDel(REC_KEY); // plus de session côté Supabase : trace locale effacée
+    if (S.linkErr) { toGate('linkError'); return; } // lien expiré, déjà utilisé ou ouvert dans un autre navigateur
     toGate(S.view === 'loading' ? 'login' : S.view, S.msg);
   }
   function offlineDecision(rec, noLib) {
@@ -4915,9 +4975,12 @@ SD.auth = (function () {
     enterApp();
   }
   function enterApp() {
-    S.status = 'in'; S.menu = false; S.msg = null; S.errors = {}; S.busy = false; S.painted = '';
-    if (!S.ready) { S.ready = true; if (typeof S.onReady === 'function') { S.onReady(); return; } }
-    paint();
+    stopWaiting(); lsDel(PENDING_KEY);
+    S.status = 'in'; S.menu = false; S.msg = null; S.errors = {}; S.busy = false; S.painted = ''; S.linkErr = ''; S.draft = {};
+    var hello = S.welcome; S.welcome = false;
+    if (!S.ready) { S.ready = true; if (typeof S.onReady === 'function') S.onReady(); else paint(); }
+    else paint();
+    if (hello) { S.lastToast = 'Adresse e-mail confirmée — bienvenue'; toast(S.lastToast, 'ok'); }
   }
   function toGate(view, msg) { if (view !== S.view) S.errors = {}; S.status = 'gate'; S.view = view; S.msg = msg || null; S.menu = false; S.busy = false; paint(); }
 
@@ -4939,7 +5002,12 @@ SD.auth = (function () {
     S.busy = false;
     if (r.error || !r.data || !r.data.session) {
       var m = errorMessage(r.error || { message: 'Invalid login credentials' });
-      if (r.error && (r.error.code === 'email_not_confirmed' || /email not confirmed/i.test(r.error.message || ''))) { S.pendingEmail = email; S.canResend = true; }
+      if (r.error && (r.error.code === 'email_not_confirmed' || /email not confirmed/i.test(r.error.message || ''))) {
+        // Adresse non confirmée : écran d'attente (code, lien, renvoi), même détection automatique qu'après l'inscription
+        S.pendingEmail = email; lsSet(PENDING_KEY, { email: email, at: clock() }); startWaiting(email, pw);
+        toGate('signupDone', { t: 'warn', m: 'Adresse e-mail pas encore confirmée.' });
+        return { ok: false, errors: {}, msg: m };
+      }
       return fail({}, { t: 'err', m: m });
     }
     S.draft = {};
@@ -4959,19 +5027,79 @@ SD.auth = (function () {
     var u = r.data && r.data.user;
     // « Confirm email » activé : une adresse déjà inscrite renvoie un utilisateur sans identité
     if (u && Array.isArray(u.identities) && u.identities.length === 0) return fail({ email: 'Adresse déjà inscrite.' }, { t: 'err', m: errorMessage({ code: 'user_already_exists' }) });
-    S.draft = {};
-    if (r.data && r.data.session) { await enterOnline(r.data.session, u); return { ok: true, session: true }; }
-    S.pendingEmail = v.email; toGate('signupDone');
+    if (r.data && r.data.session) { await enterOnline(r.data.session, u); return { ok: true, session: true }; } // « Confirm email » désactivé
+    // Attente de confirmation : adresse seule mémorisée (pour « Renvoyer » après un lien expiré), mot de passe en mémoire seulement
+    S.pendingEmail = v.email; lsSet(PENDING_KEY, { email: v.email, at: clock() }); S.resendAt = clock();
+    startWaiting(v.email, f.pw);
+    toGate('signupDone');
     return { ok: true };
   }
-  async function resend() {
-    if (!S.pendingEmail || !(await ensureClient())) return netFail();
+  /* ---------- Attente de confirmation : code, lien ouvert ailleurs, renvoi ---------- */
+  function startWaiting(email, pw) { stopWaiting(); creds = { email: email, pw: pw }; S.pollStart = clock(); S.pollInterval = POLL.interval; schedulePoll(); }
+  function stopWaiting() { creds = null; clearTimeout(pollT); pollT = null; }
+  function schedulePoll() {
+    clearTimeout(pollT); pollT = null;
+    if (!creds || !POLL.auto || !POLL.interval) return;
+    pollT = setTimeout(function () { pollTick().then(schedulePoll, schedulePoll); }, S.pollInterval || POLL.interval);
+  }
+  function waiting() { return S.status !== 'in' && (S.view === 'signupDone' || (S.view === 'privacy' && S.back === 'signupDone')); }
+  // Un passage : session déjà présente dans ce navigateur (autre onglet) ? sinon connexion silencieuse
+  // avec les identifiants en mémoire (adresse confirmée sur un autre appareil). 10 min au plus, onglet visible.
+  async function pollTick() {
+    if (!creds || !waiting()) { stopWaiting(); return false; }
+    if (clock() - S.pollStart > POLL.max) { stopWaiting(); return false; }
+    if (hasDoc() && document.visibilityState === 'hidden') return false;
+    if (S.busy || !(await ensureClient())) return false;
+    var c = S.client, gs = await safeCall(function () { return c.auth.getSession(); });
+    if (gs.data && gs.data.session) { await confirmedElsewhere(); return true; }
+    var cr = creds; if (!cr) return false;
+    var r = await safeCall(function () { return c.auth.signInWithPassword({ email: cr.email, password: cr.pw }); });
+    if (!waiting()) return false;
+    if (r.data && r.data.session) { stopWaiting(); S.welcome = true; await enterOnline(r.data.session, r.data.user || r.data.session.user); return true; }
+    var e = r.error || {};
+    if (e.status === 429 || /rate_limit/.test(e.code || '')) S.pollInterval = Math.min(60000, (S.pollInterval || POLL.interval) * 2); // ralentit si limite atteinte
+    else if (e.code === 'invalid_credentials' || /invalid login/i.test(e.message || '')) stopWaiting();
+    return false;
+  }
+  async function confirmedElsewhere() {
+    if (!waiting()) return;
+    stopWaiting(); S.welcome = true;
+    await evaluate();
+  }
+  // Code à 6 ou 8 chiffres reçu par e-mail (collé, avec ou sans espaces)
+  async function verifyCode(raw) {
+    var t = String(raw == null ? '' : raw).replace(/\D/g, '');
+    if (t.length !== 6 && t.length !== 8) return fail({ code: 'Saisissez le code à 6 ou 8 chiffres reçu par e-mail.' }, null);
+    if (!S.pendingEmail) return fail({}, { t: 'err', m: 'Adresse inconnue : utilisez « Modifier l\'adresse ».' });
+    if (!(await ensureClient())) return netFail();
+    S.busy = true; S.lastOtp = t; paint();
+    var c = S.client, email = S.pendingEmail, r = await safeCall(function () { return c.auth.verifyOtp({ email: email, token: t, type: 'signup' }); });
+    S.busy = false;
+    if (r.error || !r.data || !r.data.session) {
+      if (r.error && isNetwork(r.error)) return netFail();
+      if (r.error && (r.error.status === 429 || /rate_limit/.test(r.error.code || ''))) return fail({ code: errorMessage(r.error) }, null);
+      return fail({ code: 'Code incorrect ou expiré. Vérifiez-le, ou cliquez sur « Renvoyer » pour en recevoir un nouveau.' }, null);
+    }
+    stopWaiting(); S.welcome = true;
+    await enterOnline(r.data.session, r.data.user || r.data.session.user);
+    return { ok: true };
+  }
+  function resendLeft() { return Math.max(0, (S.resendAt || 0) + RESEND_COOLDOWN - clock()); }
+  async function resend(email) {
+    var em = normEmail(email || S.pendingEmail);
+    if (!validEmail(em)) return fail({ remail: 'Adresse e-mail invalide.' }, null);
+    var left = resendLeft();
+    if (left > 0) { var s = Math.ceil(left / 1000); S.msg = { t: 'info', m: 'Patientez ' + s + ' s avant de renvoyer l\'e-mail.' }; paint(); return { ok: false, cooldown: s, msg: S.msg.m }; }
+    if (!(await ensureClient())) return netFail();
     var c = S.client, opts = cfg().siteUrl ? { emailRedirectTo: cfg().siteUrl } : undefined;
     S.busy = true; paint();
-    var r = await safeCall(function () { return c.auth.resend({ type: 'signup', email: S.pendingEmail, options: opts }); });
+    var r = await safeCall(function () { return c.auth.resend({ type: 'signup', email: em, options: opts }); });
     S.busy = false;
-    S.msg = r.error ? { t: 'err', m: errorMessage(r.error) } : { t: 'ok', m: 'E-mail de confirmation renvoyé à ' + esc(S.pendingEmail) + '.' };
-    paint(); return { ok: !r.error };
+    if (r.error) return fail({}, { t: 'err', m: errorMessage(r.error) });
+    S.resendAt = clock(); S.pendingEmail = em; S.linkErr = ''; lsSet(PENDING_KEY, { email: em, at: clock() });
+    if (S.view !== 'signupDone') { S.errors = {}; toGate('signupDone', { t: 'ok', m: 'Nouvel e-mail envoyé.' }); }
+    else { S.msg = { t: 'ok', m: 'Nouvel e-mail envoyé.' }; S.errors = {}; paint(); }
+    return { ok: true };
   }
   async function resetPassword(email) {
     email = normEmail(email);
@@ -5111,6 +5239,16 @@ SD.auth = (function () {
       '<small class="au-hint" id="' + id + '-h">' + esc(phoneHint(iso)) + ' Le numéro n\'est pas vérifié par SMS.</small>' +
       (err ? '<small class="au-err" id="' + id + '-e">' + esc(err) + '</small>' : '') + '</fieldset>';
   }
+  // Champ du code : chiffres seulement, collage accepté, 6 ou 8 chiffres, envoi automatique (voir installDom)
+  function otpForm(primary) {
+    var err = S.errors.code, v = S.draft['otp.code'] || '';
+    return '<form class="au-form au-otp" data-auth-form="otp" method="post" novalidate><div class="fld au-fld' + (err ? ' au-bad' : '') + '"><label for="au-otp-code"><span class="lbl">Code reçu par e-mail (6 ou 8 chiffres)</span></label>' +
+      '<div class="inp"><input id="au-otp-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]*" maxlength="11" spellcheck="false" data-otp="1" class="au-otp-in"' + (err ? ' aria-invalid="true" aria-describedby="au-otp-code-e"' : '') + ' value="' + esc(v) + '"></div>' +
+      (err ? '<small class="au-err" id="au-otp-code-e" role="alert">' + esc(err) + '</small>' : '') + '</div>' +
+      '<button type="submit" class="btn' + (primary ? '' : ' btn-2') + ' au-submit"' + (S.busy ? ' disabled aria-busy="true"' : '') + '>' + (S.busy ? 'Vérification…' : 'Valider le code') + '</button></form>';
+  }
+  function resendLabel(l) { var s = Math.ceil(resendLeft() / 1000); return s > 0 ? l + ' (' + s + ' s)' : l; }
+  function resendBtn() { return '<button type="button" id="au-resend" class="btn-link" data-act="authResend"' + (S.busy || resendLeft() > 0 ? ' disabled' : '') + '>' + resendLabel('Renvoyer') + '</button>'; }
   function submitBtn(label) { return '<button type="submit" class="btn au-submit"' + (S.busy ? ' disabled aria-busy="true"' : '') + '>' + (S.busy ? 'Patientez…' : label) + '</button>'; }
   function msgLine(forKey) { if (!S.msg || (forKey && S.msgFor !== forKey) || (!forKey && S.msgFor && S.status === 'in')) return ''; return msgBox(S.msg.t, S.msg.m); }
 
@@ -5153,7 +5291,6 @@ SD.auth = (function () {
         field({ form: 'signup', name: 'email', label: 'Adresse e-mail', type: 'email', auto: 'email', inputmode: 'email', max: 254, hint: 'Un lien de confirmation y sera envoyé.' }) +
         phoneField('signup') +
         field({ form: 'signup', name: 'pw', label: 'Mot de passe', pw: true, auto: 'new-password', max: 72, meter: true }) +
-        field({ form: 'signup', name: 'pw2', label: 'Confirmation du mot de passe', pw: true, auto: 'new-password', max: 72 }) +
         '<div class="au-terms' + (terr ? ' au-bad' : '') + '"><label class="chk"><input type="checkbox" name="terms" id="au-signup-terms" required aria-required="true"' + (S.draft['signup.terms'] ? ' checked' : '') + (terr ? ' aria-invalid="true" aria-describedby="au-signup-terms-e"' : '') + '>' +
         '<span>J\'accepte les <a href="#" data-act="authPrivacy">Conditions d\'utilisation et la politique de confidentialité</a></span></label>' +
         (terr ? '<small class="au-err" id="au-signup-terms-e">' + esc(terr) + '</small>' : '') + '</div>' +
@@ -5161,9 +5298,19 @@ SD.auth = (function () {
         '<p class="au-alt">Déjà inscrit ? <button type="button" class="btn-link" data-act="authView" data-arg="login">Se connecter</button></p>');
     },
     signupDone: function () {
-      return card('Vérifiez votre boîte mail', '', msgBox('ok', 'Un e-mail de confirmation a été envoyé à <strong>' + esc(S.pendingEmail) + '</strong>.') + msgLine() +
-        '<p>Cliquez sur le lien qu\'il contient pour activer votre compte, puis connectez-vous. Pensez à regarder dans les courriers indésirables. Le lien n\'est valable que pendant une durée limitée.</p>' +
-        '<div class="au-actions"><button type="button" class="btn" data-act="authView" data-arg="login">Aller à la connexion</button><button type="button" class="btn btn-2" data-act="authResend"' + (S.busy ? ' disabled' : '') + '>Renvoyer l\'e-mail</button></div>');
+      // Écran minimal : une phrase, le code (principal si codeInEmail, sinon replié), « Renvoyer » (60 s), « Modifier l'adresse »
+      var em = '<strong>' + esc(S.pendingEmail) + '</strong>', codeFirst = cfg().codeInEmail;
+      var lead = codeFirst ? 'Saisissez le code envoyé à ' + em + ', ou cliquez sur le lien de l\'e-mail.' : 'Cliquez sur le lien reçu par e-mail à ' + em + ' : vous serez connecté automatiquement.';
+      return card('Vérifiez votre boîte mail', '', '<p class="au-lead">' + lead + '</p>' + msgLine() +
+        (codeFirst ? otpForm(true) : '<details class="au-otp-alt"' + (S.errors.code || S.draft['otp.code'] ? ' open' : '') + '><summary>J\'ai reçu un code</summary>' + otpForm(false) + '</details>') +
+        '<p class="au-wait-links">' + resendBtn() + '<span aria-hidden="true">·</span><button type="button" class="btn-link" data-act="authEdit">Modifier l\'adresse</button></p>');
+    },
+    linkError: function () {
+      return card('Lien expiré ou déjà utilisé', '', msgBox('err', esc(S.linkErr || 'Ce lien est invalide, a expiré ou a déjà été utilisé : demandez un nouvel e-mail.')) + msgLine() +
+        '<form class="au-form" data-auth-form="resend" method="post" novalidate>' +
+        field({ form: 'resend', name: 'remail', label: 'Adresse e-mail', type: 'email', auto: 'email', inputmode: 'email', max: 254, value: S.draft['resend.remail'] != null ? S.draft['resend.remail'] : S.pendingEmail }) +
+        '<button type="submit" id="au-resend" class="btn au-submit"' + (S.busy || resendLeft() > 0 ? ' disabled' : '') + '>' + resendLabel('Renvoyer l\'e-mail') + '</button></form>' +
+        '<p class="au-alt"><button type="button" class="btn-link" data-act="authView" data-arg="login">Se connecter</button></p>');
     },
     forgot: function () {
       return card('Mot de passe oublié', 'Saisissez l\'adresse de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.', offlineNote() + msgLine() +
@@ -5297,6 +5444,8 @@ SD.auth = (function () {
     if (kind === 'profile') return updateProfile(d, false);
     if (kind === 'password') return changePassword(d.cur, d.npw, d.npw2);
     if (kind === 'delete') return deleteAccount(d.del);
+    if (kind === 'otp') return verifyCode(d.code);
+    if (kind === 'resend') return resend(d.remail);
   }
   function updateMeter(input) {
     var id = input.getAttribute('data-meter'), box = id && document.getElementById(id); if (!box) return;
@@ -5304,6 +5453,15 @@ SD.auth = (function () {
     if (m) m.setAttribute('data-s', p.score); if (sp) sp.style.width = (input.value ? (p.score + 1) * 20 : 0) + '%';
     var lb = box.querySelector('.pw-lbl strong'); if (lb) lb.textContent = p.label || '—';
     p.rules.forEach(function (r) { var li = box.querySelector('[data-rule="' + r.id + '"]'); if (li) { li.className = r.ok ? 'ok' : ''; li.firstChild.textContent = r.ok ? '✓' : '·'; li.lastChild.textContent = ' : ' + (r.ok ? 'respecté' : 'non respecté'); } });
+  }
+  // Code : envoi automatique à 8 chiffres, ou à 6 chiffres après une courte pause (un code à 8 chiffres peut être en cours de saisie) ;
+  // un code collé (6 ou 8 chiffres) est envoyé aussitôt. Un même code refusé n'est pas renvoyé.
+  var otpT = null;
+  function otpInput(el, f, pasted) {
+    clearTimeout(otpT); var d = el.value.replace(/D/g, '');
+    if ((d.length !== 6 && d.length !== 8) || S.busy || (d === S.lastOtp && S.errors.code)) return;
+    var go = function () { var x = el.value.replace(/D/g, ''); if (x === d && !S.busy) verifyCode(d); };
+    if (d.length === 8 || pasted) go(); else otpT = setTimeout(go, 900);
   }
   var domOk = false;
   function installDom() {
@@ -5317,7 +5475,14 @@ SD.auth = (function () {
       var el = e.target, f = el && el.closest && el.closest('[data-auth-form]'); if (!f || !el.name) return;
       if (el.type !== 'password') S.draft[f.getAttribute('data-auth-form') + '.' + el.name] = el.type === 'checkbox' ? el.checked : el.value;
       if (el.getAttribute('data-meter')) updateMeter(el);
+      if (el.getAttribute('data-otp')) otpInput(el, f, e.inputType === 'insertFromPaste');
     });
+    // Autre onglet du même navigateur : la session apparaît dans le stockage -> entrée automatique
+    try { W.addEventListener('storage', function (e) { if (e.key === SB_KEY && e.newValue && waiting()) confirmedElsewhere(); }); } catch (e) { /* rien */ }
+    // Onglet de nouveau visible : vérification immédiate
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && creds && waiting()) pollTick(); });
+    // Décompte du bouton « Renvoyer » (60 s)
+    setInterval(function () { var b = document.getElementById('au-resend'); if (!b || S.status === 'in') return; var left = resendLeft(); b.disabled = S.busy || left > 0; b.textContent = resendLabel(b.classList.contains('btn-link') ? 'Renvoyer' : 'Renvoyer l\'e-mail'); }, 1000);
     document.addEventListener('change', function (e) {
       var el = e.target, f = el && el.closest && el.closest('[data-auth-form]'); if (!f || !el.name) return;
       if (el.type !== 'password') S.draft[f.getAttribute('data-auth-form') + '.' + el.name] = el.type === 'checkbox' ? el.checked : el.value;
@@ -5350,6 +5515,7 @@ SD.auth = (function () {
     authBack: function () { S.view = S.back && S.back !== 'privacy' ? S.back : 'login'; paint(); return false; },
     authLogout: function () { logout(); return false; },
     authResend: function () { resend(); return false; },
+    authEdit: function () { stopWaiting(); S.draft['signup.email'] = S.pendingEmail; S.msg = null; S.errors = {}; S.view = 'signup'; paint(); var el = hasDoc() && document.getElementById('au-signup-email'); if (el) try { el.focus(); el.select(); } catch (e) { /* rien */ } return false; },
     authRetry: function () { S.view = 'loading'; paint(); ensureClient().then(function () { return evaluate(); }); return false; }
   };
 
@@ -5359,7 +5525,7 @@ SD.auth = (function () {
     if (view == null) { if (saved) { Object.assign(S, saved); saved = null; S.painted = ''; paint(); } return; }
     if (!saved) saved = { status: S.status, view: S.view, msg: S.msg, errors: S.errors, pendingEmail: S.pendingEmail, menu: S.menu };
     S.status = 'gate'; S.view = view; S.menu = false; S.pendingEmail = S.pendingEmail || 'adresse@exemple.tg';
-    S.errors = opts && opts.errors ? { name: 'Indiquez votre nom complet (2 à 100 caractères).', email: 'Adresse e-mail invalide.', phone: 'Numéro trop court : 8 chiffres attendus pour Togo (+228).', pw: 'Le mot de passe doit contenir au moins 8 caractères, avec des lettres et des chiffres.', pw2: 'Les deux mots de passe ne sont pas identiques.', terms: 'Vous devez accepter les conditions d\'utilisation et la politique de confidentialité.' } : {};
+    S.errors = opts && opts.errors ? { name: 'Indiquez votre nom complet (2 à 100 caractères).', email: 'Adresse e-mail invalide.', phone: 'Numéro trop court : 8 chiffres attendus pour Togo (+228).', pw: 'Le mot de passe doit contenir au moins 8 caractères, avec des lettres et des chiffres.', pw2: 'Les deux mots de passe ne sont pas identiques.', terms: 'Vous devez accepter les conditions d\'utilisation et la politique de confidentialité.', code: 'Code incorrect ou expiré. Vérifiez-le, ou cliquez sur « Renvoyer » pour en recevoir un nouveau.', remail: 'Adresse e-mail invalide.' } : {};
     S.msg = opts && opts.errors ? { t: 'err', m: 'E-mail ou mot de passe incorrect.' } : null;
     S.painted = ''; paintGate();
   }
@@ -5438,8 +5604,9 @@ SD.auth = (function () {
     signIn: signIn, signUp: signUp, logout: logout, resetPassword: resetPassword, setNewPassword: setNewPassword, updateProfile: updateProfile, changePassword: changePassword, deleteAccount: deleteAccount, resend: resend, revalidate: revalidate,
     validateSignup: validateSignup, normalizePhone: normalizePhone, formatPhone: formatPhone, passwordCheck: passwordCheck, validEmail: validEmail, errorMessage: errorMessage, isNetwork: isNetwork, graceDecision: graceDecision,
     COUNTRIES: COUNTRIES, configured: configured, isMock: function () { return S.mock; }, urlHasAuth: function () { return URLI.auth; }, loadLib: loadLib, LIB: LIB, KEYS: { rec: REC_KEY, sb: SB_KEY },
-    preview: preview, previewViews: function () { return ['loading', 'unconfigured', 'login', 'signup', 'signupDone', 'forgot', 'forgotSent', 'recovery', 'complete', 'blocked', 'privacy']; }, openMenu: openMenu, selfTest: selfTest,
-    state: function () { return { status: S.status, view: S.view, offline: S.offline, user: S.user ? Object.assign({}, S.user) : null, msg: S.msg ? S.msg.m : '', errors: Object.assign({}, S.errors) }; },
+    preview: preview, previewViews: function () { return ['loading', 'unconfigured', 'login', 'signup', 'signupDone', 'linkError', 'forgot', 'forgotSent', 'recovery', 'complete', 'blocked', 'privacy']; }, openMenu: openMenu, selfTest: selfTest,
+    state: function () { return { status: S.status, view: S.view, offline: S.offline, user: S.user ? Object.assign({}, S.user) : null, msg: S.msg ? S.msg.m : '', errors: Object.assign({}, S.errors), pendingEmail: S.pendingEmail, toast: S.lastToast, waiting: !!creds, resendLeft: resendLeft() }; },
+    verifyCode: verifyCode, _pollTick: pollTick, _setPoll: function (o) { Object.assign(POLL, o || {}); },
     _setClock: function (fn) { clock = typeof fn === 'function' ? fn : function () { return Date.now(); }; }
   };
 })();
